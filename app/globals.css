@@ -1,26 +1,44 @@
 @import "tailwindcss";
 
+/* Dark by default. Tokens live here so a light theme can be added later by
+   overriding them under a [data-theme="light"] selector. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #0a0d12;
+  --surface: #11161e;
+  --surface-2: #171e28;
+  --border: #232c3a;
+  --fg: #e6eaf0;
+  --muted: #8a94a6;
+  --accent: #6d5efc;
+  --accent-fg: #ffffff;
+  --profit: #22c55e;
+  --loss: #f05252;
+  --warn: #f5a524;
+  color-scheme: dark;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-profit: var(--profit);
+  --color-loss: var(--loss);
+  --color-warn: var(--warn);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+body {
+  background: var(--bg);
+  color: var(--fg);
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Tabular figures so ₹ columns line up. */
+.tabular {
+  font-variant-numeric: tabular-nums;
 }

@@ -1,36 +1,48 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# TradeLens
 
-## Getting Started
+An AI-powered trading journal for Indian retail traders: NSE/BSE equity and F&O, true net P&L after Indian charges, and an AI coach for your trading process.
 
-First, run the development server:
+> Educational journaling tool. Not investment advice.
+
+## Setup
+
+Requires Node.js 20+.
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000. The first `npm run dev` creates `.env` from `.env.example` and the SQLite database (`prisma/dev.db`).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+To enable the AI Coach, set these in `.env`:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+ANTHROPIC_API_KEY="sk-ant-..."
+ANTHROPIC_MODEL="claude-sonnet-5-5"
+```
 
-## Learn More
+## Useful scripts
 
-To learn more about Next.js, take a look at the following resources:
+| Script | What it does |
+|---|---|
+| `npm run dev` | Start the app (sets up `.env` and the DB first) |
+| `npm run typecheck` | TypeScript check |
+| `npm run db:studio` | Browse the database in Prisma Studio |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Project layout
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+app/(marketing)   Landing page
+app/(app)         The journal (sidebar layout)
+components/       UI, layout, charts
+config/           brand.ts (names), market.ts (charges, lot sizes; verify before demo)
+lib/              db, formatting (₹ en-IN, IST), stats, charges, import, AI
+prisma/           schema + seed
+```
 
-## Deploy on Vercel
+## Demo script
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+_Added on Day 2._
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+See `DECISIONS.md` for choices made along the way.

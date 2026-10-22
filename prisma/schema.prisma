@@ -1,0 +1,28 @@
+// TradeLens data model. Full model lands in Day 1 step 2.
+// SQLite: "enum-like" fields are Strings validated by TS unions in lib/types.ts.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String         @id @default(cuid())
+  name      String
+  createdAt DateTime       @default(now())
+  profile   TraderProfile?
+}
+
+model TraderProfile {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  level     String   @default("BEGINNER") // BEGINNER | INTERMEDIATE | EXPERT
+  capital   Float    @default(200000)
+  language  String   @default("EN") // EN | HINGLISH
+  updatedAt DateTime @updatedAt
+}
