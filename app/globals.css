@@ -59,3 +59,14 @@ body {
 @utility btn-ghost {
   @apply btn border border-border text-fg hover:bg-surface-2;
 }
+
+/* Privacy mode: blur every ₹ amount (all rendered through <Money>, class "money"). */
+html[data-privacy] .money {
+  filter: blur(7px);
+  user-select: none;
+}
+/* Recharts 3 renders tick labels in their own layer, separate from the axis. */
+html[data-privacy] .money-chart .recharts-yAxis-tick-labels,
+html[data-privacy] .money-chart .recharts-tooltip-wrapper {
+  filter: blur(7px);
+}

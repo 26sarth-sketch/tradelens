@@ -87,3 +87,8 @@ export function pnlClass(value: number): string {
   if (value < 0) return "text-loss";
   return "text-muted";
 }
+
+/** The instant `days` × 24h before now (for "last 30 days" style filters). */
+export function daysAgo(days: number): Date {
+  return new Date(Date.now() - days * 86_400_000);
+}

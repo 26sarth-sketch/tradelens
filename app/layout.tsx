@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { InlineScript } from "@/components/ui/InlineScript";
 import { APP_NAME, TAGLINE } from "@/config/brand";
 import "./globals.css";
 
@@ -23,7 +24,15 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en-IN"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      // The inline script below may set data-privacy before React hydrates.
+      suppressHydrationWarning
     >
+      <head>
+        {/* Restore privacy mode before first paint so ₹ amounts never flash. */}
+        <InlineScript
+          html={`try{if(localStorage.getItem("tl-privacy")==="1")document.documentElement.dataset.privacy="1"}catch(e){}`}
+        />
+      </head>
       <body className="min-h-full flex flex-col font-sans">{children}</body>
     </html>
   );

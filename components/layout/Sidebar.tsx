@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { APP_NAME } from "@/config/brand";
 import { NAV_ITEMS, type NavItem, SECONDARY_NAV } from "./nav";
+import { PrivacyToggle } from "./PrivacyToggle";
 
 function NavLink({ item, onNavigate }: { item: NavItem; onNavigate?: () => void }) {
   const pathname = usePathname();
@@ -53,6 +54,7 @@ function NavBody({ onNavigate }: { onNavigate?: () => void }) {
         ))}
       </nav>
       <nav className="mt-auto flex flex-col gap-0.5 border-t border-border pt-3">
+        <PrivacyToggle />
         {SECONDARY_NAV.map((item) => (
           <NavLink key={item.href} item={item} onNavigate={onNavigate} />
         ))}
