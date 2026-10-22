@@ -13,7 +13,7 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:3000. The first `npm run dev` creates `.env` from `.env.example` and the SQLite database (`prisma/dev.db`).
+Open http://localhost:3000. The first `npm run dev` creates `.env` from `.env.example`, the SQLite database (`prisma/dev.db`), and loads demo data (about 60 trading days for a demo trader, "Aarav").
 
 To enable the AI Coach, set these in `.env`:
 
@@ -27,6 +27,9 @@ ANTHROPIC_MODEL="claude-sonnet-5-5"
 | Script | What it does |
 |---|---|
 | `npm run dev` | Start the app (sets up `.env` and the DB first) |
+| `npm run db:seed` | Wipe and reload the demo data |
+| `npx tsx scripts/check-seed.ts` | Print the demo patterns (plan vs no plan, expiry, after 2 PM, revenge) |
+| `npm test` | Unit tests (charges engine, expiry, trade builder) |
 | `npm run typecheck` | TypeScript check |
 | `npm run db:studio` | Browse the database in Prisma Studio |
 
