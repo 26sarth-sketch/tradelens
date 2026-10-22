@@ -118,6 +118,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
           value={`${s.winRate.toFixed(1)}%`}
           sub={`${s.wins} wins · ${s.losses} losses`}
           info="Winning trades ÷ all trades. A trade wins if it made money after charges. Win rate alone means little without the size of wins vs losses."
+          learnHref="/learn/profit-factor"
         />
         <StatCard
           label="Profit factor"
@@ -131,6 +132,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
           value={<span className="flex flex-wrap items-baseline gap-x-1.5 text-lg sm:text-xl"><ViewValue view={view} value={s.avgWin} className="text-profit" /><span className="text-muted">/</span><ViewValue view={view} value={-s.avgLoss} className="text-loss" /></span>}
           sub={s.winLossRatio != null ? `Ratio ${s.winLossRatio.toFixed(2)} : 1` : undefined}
           info="Average winning trade vs average losing trade. If your average loss is bigger than your average win, you need a high win rate just to break even."
+          learnHref="/learn/profit-factor"
         />
         <StatCard
           label="Expectancy"
@@ -144,6 +146,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
           value={<ViewValue view={view} value={-s.maxDrawdown} className="text-loss" />}
           sub={s.maxDrawdownPct != null ? `${s.maxDrawdownPct.toFixed(1)}% from the account's peak` : "largest fall from a peak"}
           info="The biggest fall from a high point of your running P&L to a later low. It shows how much pain your trading puts you through."
+          learnHref="/learn/position-sizing"
         />
         <StatCard
           label="Total charges"
@@ -157,6 +160,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
           value={(s.totalTrades / days.length).toFixed(1)}
           sub={`${days.filter((d) => d.value > 0).length} of ${days.length} days green`}
           info="Average number of trades on days you traded. More trades means more charges."
+          learnHref="/learn/why-charges-matter"
         />
       </div>
 

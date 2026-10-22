@@ -1,23 +1,37 @@
-/** Minimal renderer for coach text: paragraphs, "- " bullets and **bold**. No HTML injection. */
+/**
+ * Minimal renderer for coach and lesson text: paragraphs, "- " bullet lists (also
+ * directly under a heading line) and **bold**. Renders text only, never HTML.
+ */
 export function RichText({ text, className }: { text: string; className?: string }) {
-  const blocks = text.split(/\n{2,}/);
   const inline = (s: string) =>
     s.split(/(\*\*[^*]+\*\*)/g).map((part, i) =>
       part.startsWith("**") && part.endsWith("**") ? <strong key={i}>{part.slice(2, -2)}</strong> : <span key={i}>{part}</span>,
     );
-  return (
-    <div className={className}>
-      {blocks.map((b, i) => {
-        const lines = b.split("\n").filter(Boolean);
-        if (lines.length && lines.every((l) => /^\s*[-•*]\s+/.test(l))) {
-          return (
-            <ul key={i} className="my-1 list-disc space-y-0.5 pl-5">
-              {lines.map((l, j) => <li key={j}>{inline(l.replace(/^\s*[-•*]\s+/, ""))}</li>)}
-            </ul>
-          );
-        }
-        return <p key={i} className="my-1">{lines.map((l, j) => <span key={j}>{inline(l)}{j < lines.length - 1 && <br />}</span>)}</p>;
-      })}
-    </div>
-  );
+  const isBullet = (l: string) => /^\s*[-•*]\s+/.test(l);
+
+  const nodes: React.ReactNode[] = [];
+  text.split(/\n{2,}/).forEach((block, bi) => {
+    const lines = block.split("\n").filter((l) => l.trim());
+    let i = 0;
+    while (i < lines.length) {
+      if (isBullet(lines[i])) {
+        const items: string[] = [];
+        while (i < lines.length && isBullet(lines[i])) items.push(lines[i++].replace(/^\s*[-•*]\s+/, ""));
+        nodes.push(
+          <ul key={`${bi}-${i}`} className="my-1 list-disc space-y-0.5 pl-5">
+            {items.map((it, j) => <li key={j}>{inline(it)}</li>)}
+          </ul>,
+        );
+      } else {
+        const para: string[] = [];
+        while (i < lines.length && !isBullet(lines[i])) para.push(lines[i++]);
+        nodes.push(
+          <p key={`${bi}-${i}`} className="my-1">
+            {para.map((l, j) => <span key={j}>{inline(l)}{j < para.length - 1 && <br />}</span>)}
+          </p>,
+        );
+      }
+    }
+  });
+  return <div className={className}>{nodes}</div>;
 }
