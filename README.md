@@ -15,7 +15,7 @@ npm run dev
 
 Open http://localhost:3000. The first `npm run dev` creates `.env` from `.env.example`, the SQLite database (`prisma/dev.db`), and loads demo data (about 60 trading days for a demo trader, "Aarav").
 
-To enable the AI Coach, set these in `.env`:
+To enable the AI Coach, run `npm run set-key` (paste your key at the hidden prompt) or set these in `.env`:
 
 ```
 ANTHROPIC_API_KEY="sk-ant-..."
