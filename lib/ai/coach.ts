@@ -7,13 +7,13 @@ import { db } from "../db";
 import { istDateKey } from "../format";
 import { loadReportTrades } from "../report-data";
 import { aiConfig, callStructured, fallbackParams, getClient, mapError, notConfigured, type AiFailure } from "./client";
-import { journalContext, sessionContext, weeklyContext } from "./context";
+import { journalContext, sessionContext, tradeContext, weeklyContext } from "./context";
 import { executeQuery, QUERY_TOOL, type QueryInput } from "./journal-query";
 import { systemPrompt } from "./prompts";
-import { FirstImportSchema, SessionSchema, WeeklySchema } from "./schemas";
+import { FirstImportSchema, SessionSchema, TradeFeedbackSchema, WeeklySchema } from "./schemas";
 import { verifyNumbers, type Verification } from "./verify";
 
-export type ReportType = "FIRST_IMPORT" | "WEEKLY" | "SESSION";
+export type ReportType = "FIRST_IMPORT" | "WEEKLY" | "SESSION" | "TRADE";
 
 export type StoredReport<T = unknown> = {
   output: T;
@@ -89,6 +89,25 @@ export async function generateSession(userId: string, date: string): Promise<Rep
   if (!res.ok) return res;
   const report = { output: res.data, verification: verifyNumbers(res.data, data), generatedAt: new Date().toISOString(), model: res.model, scope: date };
   await store(userId, "SESSION", date, report);
+  return { ok: true, report };
+}
+
+/** Process feedback on one trade (judges the process, not the outcome). */
+export async function generateTradeFeedback(userId: string, tradeId: string): Promise<ReportResult> {
+  const missing = notConfigured();
+  if (missing) return missing;
+  const { prof, data } = await tradeContext(userId, tradeId);
+  if (!data) return { ok: false, reason: "no_data", message: "Trade not found." };
+  const res = await callStructured({
+    system: systemPrompt("trade", prof.level, prof.language),
+    user: userMessage("Give me feedback on this trade.", data),
+    schema: TradeFeedbackSchema,
+    effort: "low",
+    maxTokens: 8000,
+  });
+  if (!res.ok) return res;
+  const report = { output: res.data, verification: verifyNumbers(res.data, data), generatedAt: new Date().toISOString(), model: res.model, scope: `${data.trade.symbol} · ${data.trade.date}` };
+  await store(userId, "TRADE", tradeId, report);
   return { ok: true, report };
 }
 

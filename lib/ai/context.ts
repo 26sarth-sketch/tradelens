@@ -12,7 +12,8 @@ import { groupReport, type ReportKey } from "../reports";
 import { limitsOf } from "../rule-store";
 import { dayStatus, RULE_LABELS } from "../rules";
 import { computeStats } from "../stats";
-import { parseIdList } from "../strategies";
+import { parseIdList, parseRules } from "../strategies";
+import { excursions } from "../trades";
 import type { RiskRule } from "../types";
 import { packStats } from "./pack";
 
@@ -245,6 +246,78 @@ export async function sessionContext(userId: string, date: string) {
         .sort((a, b) => a.entryAt.getTime() - b.entryAt.getTime())
         .map((t) => ({ ...packTrade({ ...t, ...details.get(t.id) }, prof.names), running_net_after_inr: r0((running += t.netPnl)) })),
       end_of_day_reflection: journal?.eodRating != null ? { went_well: journal.eodWentWell, to_improve: journal.eodToImprove, discipline_rating_1_to_5: journal.eodRating } : null,
+    },
+  };
+}
+
+/** Per-trade feedback: the trade in full, its plan and checklist, and what led up to it that day. */
+export async function tradeContext(userId: string, tradeId: string) {
+  const prof = await loadProfile(userId);
+  const t = await db.trade.findFirst({
+    where: { id: tradeId, userId },
+    include: { strategy: true, ruleChecks: true, tags: { include: { tag: true } }, breaches: true },
+  });
+  if (!t) return { prof, data: null };
+
+  const day = istDateKey(t.entryAt);
+  const sameDay = await db.trade.findMany({
+    where: { userId, entryAt: { gte: fromIST(day, "00:00"), lt: t.entryAt } },
+    orderBy: { entryAt: "asc" },
+    select: { symbol: true, entryAt: true, exitAt: true, netPnl: true },
+  });
+  const prev = sameDay.at(-1);
+  const checked = t.strategyId ? parseIdList(t.ruleChecks.find((c) => c.strategyId === t.strategyId)?.checkedRules) : [];
+  const rules = t.strategy
+    ? (["entryRules", "exitRules", "riskRules"] as const).flatMap((k) =>
+        parseRules(t.strategy![k]).map((r) => ({ group: k.replace("Rules", ""), rule: r.text, followed: checked.includes(r.id) })),
+      )
+    : [];
+  const exc = excursions(t);
+
+  return {
+    prof,
+    data: {
+      trader: prof.trader,
+      trade: {
+        symbol: t.symbol,
+        segment: t.segment,
+        direction: t.direction,
+        date: day,
+        entry_time_ist: formatTimeIST(t.entryAt),
+        exit_time_ist: formatTimeIST(t.exitAt),
+        held_minutes: Math.round((t.exitAt.getTime() - t.entryAt.getTime()) / 60000),
+        qty: t.qty,
+        lots: t.lots,
+        entry_price: t.avgEntry,
+        exit_price: t.avgExit,
+        gross_pnl_inr: r0(t.grossPnl),
+        charges_inr: r0(t.totalCharges),
+        net_pnl_inr: r0(t.netPnl),
+        expiry_day: t.isExpiryDay,
+        stop_loss: t.plannedSL,
+        target: t.plannedTarget,
+        planned_reward_to_risk: t.plannedR,
+        r_multiple: t.rMultiple,
+        best_open_profit_inr: exc ? r0(exc.mfe) : null,
+        worst_open_loss_inr: exc ? r0(exc.mae) : null,
+        left_on_table_inr: exc ? r0(exc.leftOnTable) : null,
+        emotion_before: t.emotionBefore,
+        emotion_after: t.emotionAfter,
+        followed_plan_self_report: t.followedPlan,
+        strategy: t.strategy?.name ?? null,
+        strategy_checklist: rules,
+        tags: t.tags.filter((x) => x.accepted).map((x) => x.tag.name),
+        auto_tagger_flags: t.tags.filter((x) => !x.accepted && !x.dismissed).map((x) => ({ tag: x.tag.name, reason: x.reason })),
+        risk_rules_broken: t.breaches.map((b) => RULE_LABELS[b.rule as RiskRule] ?? b.rule),
+        notes: t.notes ? t.notes.slice(0, 400) : undefined,
+      },
+      earlier_that_day: {
+        trades_before_this: sameDay.length,
+        net_before_this_inr: r0(sameDay.reduce((s, x) => s + x.netPnl, 0)),
+        previous_trade: prev
+          ? { symbol: prev.symbol, net_pnl_inr: r0(prev.netPnl), minutes_between_exit_and_this_entry: Math.round((t.entryAt.getTime() - prev.exitAt.getTime()) / 60000) }
+          : null,
+      },
     },
   };
 }

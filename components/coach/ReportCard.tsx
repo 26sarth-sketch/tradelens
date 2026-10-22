@@ -5,7 +5,7 @@ import { AlertTriangle, CheckCircle2, Loader2, RefreshCw, Sparkles, TrendingDown
 import { useEffect, useRef, useState, useTransition } from "react";
 import { runReport } from "@/app/(app)/coach/actions";
 import type { ReportResult, ReportType, StoredReport } from "@/lib/ai/coach";
-import type { FirstImport, Session, Weekly } from "@/lib/ai/schemas";
+import type { FirstImport, Session, TradeFeedback, Weekly } from "@/lib/ai/schemas";
 import { formatDateTimeIST } from "@/lib/format";
 import { VerificationBadge } from "./VerificationBadge";
 
@@ -114,6 +114,34 @@ function SessionView({ r }: { r: Session }) {
   );
 }
 
+const TRADE_VERDICT: Record<TradeFeedback["verdict"], { label: string; cls: string }> = {
+  good_process: { label: "Good process", cls: "bg-profit/15 text-profit" },
+  mixed: { label: "Mixed process", cls: "bg-warn/15 text-warn" },
+  poor_process: { label: "Poor process", cls: "bg-loss/15 text-loss" },
+};
+
+function TradeView({ r }: { r: TradeFeedback }) {
+  return (
+    <div className="space-y-4">
+      <span className={clsx("inline-block rounded px-2 py-0.5 text-xs font-medium uppercase", TRADE_VERDICT[r.verdict].cls)}>{TRADE_VERDICT[r.verdict].label}</span>
+      <div className="grid gap-5 md:grid-cols-2">
+        {r.went_well.length > 0 && (
+          <Section title="Went well">
+            <ul className="space-y-1.5">{r.went_well.map((x, i) => <li key={i} className="flex gap-2 text-sm"><CheckCircle2 size={16} className="mt-0.5 shrink-0 text-profit" aria-hidden />{x}</li>)}</ul>
+          </Section>
+        )}
+        <Section title="To improve">
+          <ul className="space-y-1.5">{r.to_improve.map((x, i) => <li key={i} className="flex gap-2 text-sm"><AlertTriangle size={16} className="mt-0.5 shrink-0 text-warn" aria-hidden />{x}</li>)}</ul>
+        </Section>
+      </div>
+      <div className="rounded-lg border border-accent/30 bg-accent/5 p-3 text-sm">
+        <span className="text-xs uppercase tracking-wide text-muted">Lesson</span>
+        <p className="font-medium">{r.lesson}</p>
+      </div>
+    </div>
+  );
+}
+
 function NextSteps({ title, items }: { title: string; items: string[] }) {
   return (
     <Section title={title}>
@@ -133,6 +161,7 @@ const LABELS: Record<ReportType, { cta: string; loading: string }> = {
   FIRST_IMPORT: { cta: "Analyse my journal", loading: "Reading your journal…" },
   WEEKLY: { cta: "Generate weekly review", loading: "Reviewing your week…" },
   SESSION: { cta: "Review this session", loading: "Comparing your plan with your trades…" },
+  TRADE: { cta: "Get coach feedback", loading: "Reviewing this trade…" },
 };
 
 /** Renders a cached AI report, or a button to generate one. */
@@ -181,7 +210,7 @@ export function ReportCard({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- run once on mount
   }, []);
 
-  const out = report?.output as (FirstImport & Weekly & Session) | undefined;
+  const out = report?.output as (FirstImport & Weekly & Session & TradeFeedback) | undefined;
 
   return (
     <section className="rounded-xl border border-border bg-surface p-4 sm:p-5">
@@ -219,6 +248,7 @@ export function ReportCard({
           {type === "FIRST_IMPORT" && <FirstImportView r={out} />}
           {type === "WEEKLY" && <WeeklyView r={out} />}
           {type === "SESSION" && <SessionView r={out} />}
+          {type === "TRADE" && <TradeView r={out} />}
           <div className="flex flex-wrap items-center gap-2 border-t border-border pt-3 text-xs text-muted">
             <VerificationBadge v={report.verification} />
             <span>{report.scope} · generated {formatDateTimeIST(report.generatedAt)} · {report.model}</span>

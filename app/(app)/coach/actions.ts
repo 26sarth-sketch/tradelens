@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { askJournal, type ChatResult, generateFirstImport, generateSession, generateWeekly, type ReportResult, type ReportType } from "@/lib/ai/coach";
+import { askJournal, type ChatResult, generateFirstImport, generateSession, generateTradeFeedback, generateWeekly, type ReportResult, type ReportType } from "@/lib/ai/coach";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/user";
 
@@ -14,6 +14,10 @@ export async function runReport(type: ReportType, key: string): Promise<ReportRe
   if (type === "WEEKLY" && DAY.test(key)) res = await generateWeekly(user.id, key);
   else if (type === "SESSION" && DAY.test(key)) res = await generateSession(user.id, key);
   else if (type === "FIRST_IMPORT") res = await generateFirstImport(user.id, key);
+  else if (type === "TRADE") {
+    res = await generateTradeFeedback(user.id, key);
+    revalidatePath(`/trades/${key}`);
+  }
   else return { ok: false, reason: "no_data", message: "Unknown report." };
   revalidatePath("/coach");
   return res;

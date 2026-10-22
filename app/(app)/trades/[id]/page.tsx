@@ -2,7 +2,10 @@ import clsx from "clsx";
 import { ArrowLeft, Check, CheckCircle2, Sparkles, Trash2, X } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ReportCard } from "@/components/coach/ReportCard";
 import { TradeReviewForm } from "@/components/trades/TradeReviewForm";
+import { aiConfig } from "@/lib/ai/client";
+import { getCachedReport } from "@/lib/ai/coach";
 import { Card, Stat } from "@/components/ui/Card";
 import { ConfirmButton } from "@/components/ui/ConfirmButton";
 import { Money } from "@/components/ui/Money";
@@ -184,6 +187,17 @@ export default async function TradeDetailPage({
             </ul>
           </div>
         )}
+
+        <div className="lg:col-span-3">
+          <ReportCard
+            type="TRADE"
+            reportKey={t.id}
+            initial={await getCachedReport(user.id, "TRADE", t.id)}
+            aiEnabled={aiConfig().enabled}
+            title="Coach feedback"
+            subtitle="Judges your process (plan, stop-loss, sizing, timing, emotion), not whether the trade made money."
+          />
+        </div>
 
         <Card title="Review this trade" className="lg:col-span-3">
           <TradeReviewForm
