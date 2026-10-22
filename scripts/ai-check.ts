@@ -21,5 +21,5 @@ import { aiConfig, chatCompletion } from "@/lib/ai/client";
   console.log(`Served by:       ${r.meta.model}`);
   console.log(`Reply:           ${r.res.choices?.[0]?.message?.content?.trim()}`);
   console.log(`Tokens:          ${r.meta.promptTokens} in / ${r.meta.completionTokens} out`);
-  console.log(`Cost (usage):    $${r.meta.cost ?? "not reported"}`);
+  console.log(`Cost (usage):    $${r.meta.cost ?? "not reported"}${r.meta.byok ? " (billed to your Google account via OpenRouter BYOK)" : " (OpenRouter credits)"}`);
 })();

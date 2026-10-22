@@ -24,7 +24,9 @@ export type AiFailure = {
   reason: "no_key" | "bad_model" | "credits" | "refusal" | "truncated" | "parse" | "auth" | "rate_limit" | "api";
   message: string;
 };
-export type CallMeta = { model: string; cost: number | null; promptTokens: number | null; completionTokens: number | null };
+/** cost = what the call cost in USD. With BYOK (a Google key attached to the OpenRouter account)
+ * OpenRouter charges $0 and Google bills the upstream cost directly, so we report that instead. */
+export type CallMeta = { model: string; cost: number | null; byok: boolean; promptTokens: number | null; completionTokens: number | null };
 export type AiSuccess<T> = { ok: true; data: T; model: string; cost: number | null };
 export type AiResult<T> = AiSuccess<T> | AiFailure;
 
@@ -62,7 +64,7 @@ type ChatResponse = {
     native_finish_reason?: string | null;
     message?: { content?: string | null; tool_calls?: ToolCall[]; reasoning_details?: unknown[]; refusal?: string | null };
   }[];
-  usage?: { cost?: number; prompt_tokens?: number; completion_tokens?: number };
+  usage?: { cost?: number; is_byok?: boolean; cost_details?: { upstream_inference_cost?: number }; prompt_tokens?: number; completion_tokens?: number };
   error?: { code?: number; message?: string };
 };
 
@@ -97,12 +99,13 @@ export async function chatCompletion(body: Record<string, unknown>): Promise<{ o
       if (res.ok && !json.error) {
         const meta: CallMeta = {
           model: json.model ?? model,
-          cost: json.usage?.cost ?? null,
+          cost: (json.usage?.is_byok ? json.usage?.cost_details?.upstream_inference_cost : json.usage?.cost) ?? null,
+          byok: Boolean(json.usage?.is_byok),
           promptTokens: json.usage?.prompt_tokens ?? null,
           completionTokens: json.usage?.completion_tokens ?? null,
         };
         // Cost per call for the server log (the key itself is never logged).
-        console.log(`[ai] ${meta.model} · ${meta.promptTokens ?? "?"} in / ${meta.completionTokens ?? "?"} out · $${meta.cost ?? "?"}`);
+        console.log(`[ai] ${json.id ?? "?"} · ${meta.model} · ${meta.promptTokens ?? "?"} in / ${meta.completionTokens ?? "?"} out · $${meta.cost ?? "?"}${meta.byok ? " (billed by Google via BYOK)" : ""}`);
         return { ok: true, res: json, meta };
       }
       status = json.error?.code ?? status;
