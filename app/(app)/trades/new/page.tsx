@@ -1,4 +1,5 @@
 import { Upload } from "lucide-react";
+import Link from "next/link";
 import { ManualTradeForm } from "@/components/trades/ManualTradeForm";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { istDateKey } from "@/lib/format";
@@ -12,9 +13,9 @@ export default function NewTradePage() {
         title="Add a trade"
         description="Log a completed round trip. Charges are calculated for you."
         actions={
-          <span className="btn-ghost cursor-not-allowed opacity-60" title="Coming in Day 1, steps 5 and 6">
-            <Upload size={16} /> Import CSV (soon)
-          </span>
+          <Link href="/trades/import" className="btn-ghost">
+            <Upload size={16} /> Import broker CSV
+          </Link>
         }
       />
       <ManualTradeForm today={istDateKey(new Date())} />

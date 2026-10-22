@@ -31,3 +31,10 @@ Choices made where the brief was ambiguous, newest at the bottom. Each one is ea
 | 25 | **Revenge trades are only generated after option losses**, one lot bigger, within 2–9 minutes; ~40% are left untagged for the AI auto-tagger to find. | Mirrors real behaviour and gives the auto-tagger something to do. |
 | 26 | **`npm run dev` seeds only an empty database.** `npm run db:seed` always wipes and reloads. | Fresh clones get a full demo; real data is never overwritten by accident. |
 | 27 | **Today's demo trades are included only if already closed** at seed time. | Avoids "future" trades if you seed mid-session. Re-seed on demo morning for a fresh "today". |
+| 28 | **Round trips: position goes 0 → non-zero → 0 per instrument, walked in time order.** Scale-ins/partial exits stay in one trade; a fill that flips the position is split (ids `<id>` and `<id>#2`). | Matches how traders think about "a trade"; FIFO average prices. |
+| 29 | **Open positions at the end of a file are reported, not imported.** Import again after exiting. Their fills aren't stored, so a later tradebook containing the opening fill completes the trade. | A journal of closed trades; avoids half-trades with no exit. Limitation: a later file with only the closing fill shows as an unmatched open position. |
+| 30 | **Equity intraday vs delivery is inferred**: same IST day = intraday, held overnight = delivery. | Tradebooks don't include MIS/CNC. |
+| 31 | **Duplicate protection by broker trade id** (`ZERODHA:<exchange>:<trade_id>`, unique in `Execution`). Preview and save both re-run the pipeline from the raw CSV. | Re-importing an overlapping date range is safe; no server-side state between steps. |
+| 32 | **Expiry: `expiry_date` column wins; otherwise parsed from the symbol** (weekly `YYMDD` codes, monthly = last expiry weekday). MCX/CDS rows are skipped with a message. | Covers both Console export variants. |
+| 33 | **Import can be undone** (deletes the batch's trades). Server actions accept files up to 10 MB. | Safe to demo repeatedly. |
+| 34 | **Sample tradebook lives in `public/samples/`** with a "Try the sample file" button. | One-click import in the demo. |
