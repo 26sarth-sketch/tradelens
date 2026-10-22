@@ -6,10 +6,10 @@ import { randomUUID } from "node:crypto";
 import { mkdir, readFile, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-// Resolved at runtime. Avoid `path.join(process.cwd(), …)` here: Turbopack traces that
-// pattern, starts watching the project folder, and the dev server's own writes then
-// trigger an endless Fast Refresh reload loop on any page that imports this module.
-export const UPLOAD_DIR = path.resolve(process.env.UPLOAD_DIR ?? "uploads");
+// Resolved at runtime. Turbopack statically traces filesystem calls; without the
+// `turbopackIgnore` hints below (and with `path.join(process.cwd(), …)`), it traces the
+// whole project, which in dev caused an endless Fast Refresh reload loop.
+export const UPLOAD_DIR = path.resolve(/* turbopackIgnore: true */ process.env.UPLOAD_DIR ?? "uploads");
 export const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 /** Only names we generate are ever read back: uuid + known image extension. */
 export const SAFE_NAME = /^[0-9a-f-]{36}\.(png|jpg|webp|gif)$/;
@@ -37,15 +37,15 @@ export async function saveImage(file: File): Promise<{ name: string } | { error:
   const ext = sniff(buf);
   if (!ext) return { error: "Screenshot must be a PNG, JPG, WebP or GIF image." };
   const name = `${randomUUID()}.${ext}`;
-  await mkdir(UPLOAD_DIR, { recursive: true });
-  await writeFile(path.join(UPLOAD_DIR, name), buf);
+  await mkdir(/* turbopackIgnore: true */ UPLOAD_DIR, { recursive: true });
+  await writeFile(/* turbopackIgnore: true */ path.join(/* turbopackIgnore: true */ UPLOAD_DIR, name), buf);
   return { name };
 }
 
 export async function readImage(name: string): Promise<Buffer | null> {
   if (!SAFE_NAME.test(name)) return null;
   try {
-    return await readFile(path.join(UPLOAD_DIR, name));
+    return await readFile(/* turbopackIgnore: true */ path.join(/* turbopackIgnore: true */ UPLOAD_DIR, name));
   } catch {
     return null;
   }
@@ -53,5 +53,5 @@ export async function readImage(name: string): Promise<Buffer | null> {
 
 export async function deleteImage(name: string | null | undefined) {
   if (!name || !SAFE_NAME.test(name)) return;
-  await unlink(path.join(UPLOAD_DIR, name)).catch(() => {});
+  await unlink(/* turbopackIgnore: true */ path.join(/* turbopackIgnore: true */ UPLOAD_DIR, name)).catch(() => {});
 }
