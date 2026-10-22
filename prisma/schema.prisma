@@ -1,5 +1,7 @@
-// TradeLens data model. Full model lands in Day 1 step 2.
-// SQLite: "enum-like" fields are Strings validated by TS unions in lib/types.ts.
+// TradeLens data model.
+// SQLite: "enum-like" fields are Strings validated by the TS unions in lib/types.ts.
+// List fields are JSON-encoded Strings. Money is Float rupees rounded to 2 decimals.
+// All DateTimes are UTC instants; display and day-grouping use IST (lib/format.ts).
 
 generator client {
   provider = "prisma-client-js"
@@ -11,18 +13,275 @@ datasource db {
 }
 
 model User {
-  id        String         @id @default(cuid())
-  name      String
-  createdAt DateTime       @default(now())
-  profile   TraderProfile?
+  id         String         @id @default(cuid())
+  name       String
+  createdAt  DateTime       @default(now())
+  profile    TraderProfile?
+  trades     Trade[]
+  strategies Strategy[]
+  tags       Tag[]
+  imports    ImportBatch[]
+  journals   DailyJournal[]
+  breaches   RuleBreach[]
+  missed     MissedTrade[]
+  aiReports  AiReport[]
+  chat       ChatMessage[]
 }
 
+/// Small "trader profile" sent with every AI call so the coach remembers the user.
 model TraderProfile {
-  id        String   @id @default(cuid())
-  userId    String   @unique
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  level     String   @default("BEGINNER") // BEGINNER | INTERMEDIATE | EXPERT
-  capital   Float    @default(200000)
-  language  String   @default("EN") // EN | HINGLISH
+  id                   String  @id @default(cuid())
+  userId               String  @unique
+  user                 User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  level                String  @default("BEGINNER") // Level
+  capital              Float   @default(200000)
+  language             String  @default("EN") // Language
+  broker               String? // free text, e.g. "Zerodha"
+  brokeragePlan        String  @default("DISCOUNT") // key of BROKERAGE_PLANS in config/market.ts
+  preferredStrategyIds String  @default("[]") // JSON string[]
+  onboarded            Boolean @default(false)
+
+  // Risk rules (null = rule off)
+  maxDailyLoss         Float?
+  maxTradesPerDay      Int?
+  maxLossPerTrade      Float?
+  maxConsecutiveLosses Int?
+  noTradeAfter         String? // "HH:MM" IST, e.g. "14:30"
+
   updatedAt DateTime @updatedAt
+}
+
+model ImportBatch {
+  id         String      @id @default(cuid())
+  userId     String
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  source     String // ImportSource
+  filename   String?
+  columnMap  String? // JSON: our field -> CSV column (generic importer)
+  rowCount   Int         @default(0)
+  tradeCount Int         @default(0)
+  createdAt  DateTime    @default(now())
+  executions Execution[]
+  trades     Trade[]
+}
+
+/// One broker fill. Executions are grouped into round-trip Trades.
+model Execution {
+  id            String       @id @default(cuid())
+  batchId       String?
+  batch         ImportBatch? @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  tradeId       String?
+  trade         Trade?       @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+  symbol        String // broker trading symbol as given
+  side          String // Side
+  qty           Float
+  price         Float
+  executedAt    DateTime
+  exchange      String // Exchange
+  orderId       String?
+  brokerTradeId String?      @unique // prevents duplicate imports
+
+  @@index([tradeId])
+}
+
+/// One complete round trip (flat -> position -> flat).
+model Trade {
+  id      String       @id @default(cuid())
+  userId  String
+  user    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  batchId String?
+  batch   ImportBatch? @relation(fields: [batchId], references: [id], onDelete: SetNull)
+  source  String       @default("MANUAL") // ImportSource
+
+  // Instrument
+  exchange   String // Exchange
+  segment    String // Segment
+  symbol     String // display symbol, e.g. "NIFTY 24500 CE" or "RELIANCE"
+  underlying String // "NIFTY", "BANKNIFTY", "RELIANCE"...
+  optionType String? // CE | PE
+  strike     Float?
+  expiry     DateTime?
+  lots       Float?
+  lotSize    Int?
+
+  // Execution summary
+  direction  String // Direction
+  qty        Float
+  avgEntry   Float
+  avgExit    Float
+  entryAt    DateTime
+  exitAt     DateTime
+  buyOrders  Int      @default(1)
+  sellOrders Int      @default(1)
+
+  // P&L and charges (computed by lib/charges.ts; recompute when config/market.ts changes)
+  grossPnl     Float
+  brokerage    Float
+  stt          Float
+  exchangeTxn  Float
+  sebiFee      Float
+  stampDuty    Float
+  gst          Float
+  otherCharges Float   @default(0) // DP charges on delivery sells
+  totalCharges Float
+  netPnl       Float
+  points       Float? // per-unit price move in trade direction (index points for index options/futures)
+  isExpiryDay  Boolean @default(false)
+
+  // Planning and review
+  plannedSL     Float?
+  plannedTarget Float?
+  plannedR      Float? // reward:risk planned from SL/target
+  rMultiple     Float? // net P&L / planned risk
+  highPrice     Float? // highest price during the trade (manual) -> MFE/MAE
+  lowPrice      Float?
+  strategyId    String?
+  strategy      Strategy? @relation(fields: [strategyId], references: [id], onDelete: SetNull)
+  emotionBefore String? // Emotion
+  emotionAfter  String? // Emotion
+  followedPlan  Boolean?
+  notes         String    @default("")
+  screenshot    String? // path under /public/uploads
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  executions Execution[]
+  tags       TradeTag[]
+  ruleChecks TradeRuleCheck[]
+  breaches   RuleBreach[]
+
+  @@index([userId, entryAt])
+  @@index([strategyId])
+}
+
+/// A playbook. Rules are JSON checklists: [{ id, text }].
+model Strategy {
+  id          String           @id @default(cuid())
+  userId      String
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  description String           @default("")
+  entryRules  String           @default("[]")
+  exitRules   String           @default("[]")
+  riskRules   String           @default("[]")
+  color       String           @default("#6d5efc")
+  createdAt   DateTime         @default(now())
+  trades      Trade[]
+  ruleChecks  TradeRuleCheck[]
+  missed      MissedTrade[]
+}
+
+/// Which playbook rules a trade satisfied.
+model TradeRuleCheck {
+  id           String   @id @default(cuid())
+  tradeId      String
+  trade        Trade    @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+  strategyId   String
+  strategy     Strategy @relation(fields: [strategyId], references: [id], onDelete: Cascade)
+  checkedRules String   @default("[]") // JSON string[] of rule ids
+
+  @@unique([tradeId, strategyId])
+}
+
+model Tag {
+  id     String     @id @default(cuid())
+  userId String
+  user   User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name   String
+  color  String     @default("#8a94a6")
+  kind   String     @default("USER") // TagKind
+  trades TradeTag[]
+
+  @@unique([userId, name])
+}
+
+model TradeTag {
+  tradeId     String
+  trade       Trade   @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+  tagId       String
+  tag         Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  aiSuggested Boolean @default(false)
+  accepted    Boolean @default(true) // false = AI suggestion awaiting review
+
+  @@id([tradeId, tagId])
+}
+
+/// A setup that matched a strategy but wasn't taken.
+model MissedTrade {
+  id              String    @id @default(cuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  strategyId      String?
+  strategy        Strategy? @relation(fields: [strategyId], references: [id], onDelete: SetNull)
+  date            DateTime
+  symbol          String
+  reason          String    @default("")
+  hypotheticalPnl Float?
+  notes           String    @default("")
+  createdAt       DateTime  @default(now())
+}
+
+/// One per IST trading day: notes, pre-market plan and end-of-day reflection.
+model DailyJournal {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date   String // IST day key "YYYY-MM-DD"
+  notes  String @default("")
+
+  // Pre-market plan
+  planMaxTrades   Int?
+  planMaxLoss     Float?
+  planStrategyIds String  @default("[]") // JSON string[]
+  planMood        String? // Emotion
+  planNotes       String  @default("")
+
+  // End-of-day reflection
+  eodWentWell  String @default("")
+  eodToImprove String @default("")
+  eodRating    Int? // 1-5
+
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, date])
+}
+
+model RuleBreach {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date      String // IST day key
+  rule      String // RiskRule
+  value     Float // what happened
+  limit     Float // what the rule allowed
+  tradeId   String?
+  trade     Trade?   @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([userId, date])
+}
+
+/// Cached structured AI output (rendered as cards).
+model AiReport {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String // AiReportType
+  key       String // date, ISO week, tradeId or batchId
+  json      String
+  model     String
+  createdAt DateTime @default(now())
+
+  @@unique([userId, type, key])
+}
+
+model ChatMessage {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role          String // "user" | "assistant"
+  content       String
+  computedFacts String? // JSON facts computed in code and given to the model
+  createdAt     DateTime @default(now())
 }

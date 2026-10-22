@@ -16,3 +16,9 @@ Choices made where the brief was ambiguous, newest at the bottom. Each one is ea
 | 10 | **Money stored as Float rupees**, rounded to 2 decimals. | Precise enough for a journal; avoids paise conversions everywhere. |
 | 11 | **"Progress" page = Lens Score over time + plan-adherence streak + rule-breach calendar.** | The prompt lists the page without defining it. |
 | 12 | **Cache Components off; the `(app)` layout is `force-dynamic`.** | Next 16.4 enables Cache Components by default, which requires Suspense around every DB read. A single-user journal is all live data, so per-request rendering is simpler and avoids reading the DB at build time. |
+| 13 | **Charges rates as of Oct 2026**, including the STT rise from 1 Apr 2026 (futures 0.05%, options 0.15% of sell premium) and NSE lot sizes NIFTY 65 / BANKNIFTY 30. | Best-known current values; all in `config/market.ts`, flagged "verify before demo". |
+| 14 | **Not modelled in charges:** STT on exercised ITM options, NSE IPFT (~₹10/cr), and exchange holidays shifting expiry days. | Small or rare; keeps the engine simple. Documented in code comments. |
+| 15 | **Each charge is rounded to paise separately**, and GST is applied to the rounded components. | Deterministic, matches how brokers show contract notes, and keeps tests hand-checkable. |
+| 16 | **Brokerage is per executed order**: a trade stores buy/sell order counts; percentage brokerage splits a side's value evenly across its orders. | Imports give us fill counts; exact per-order values aren't needed for a journal. |
+| 17 | **Default brokerage plan is "DISCOUNT"** (₹20/order or 0.03%, free delivery); "FLAT20" is the alternative, chosen in the profile. | Covers Zerodha/Upstox/Angel One and Dhan/Groww-style plans. |
+| 18 | **Tests use Node's built-in test runner via `tsx`** (`npm test`). | No extra framework to install. |
