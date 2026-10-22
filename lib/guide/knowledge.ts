@@ -209,7 +209,7 @@ export const GUIDE_TOPICS: GuideTopic[] = [
     id: "missed-trades",
     title: "Log a missed trade",
     href: "/strategies",
-    keywords: ["missed trade", "missed", "didn't take", "did not take", "skipped setup", "hesitated", "left on the table"],
+    keywords: ["missed trade", "missed", "didn't take", "did not take", "trade i didn't take", "trade i did not take", "skipped setup", "setup i skipped", "hesitated", "left on the table"],
     summary: "On a strategy's page, use **Missed trades for this strategy** to record a setup you did not take, with the reason and what it would have made.",
   },
   {
@@ -290,7 +290,7 @@ export const GUIDE_TOPICS: GuideTopic[] = [
     href: "/learn/lens-score",
     keywords: ["lens score", "score", "grade", "rating", "points out of 100", "radar", "level", "what is my score", "improve score"],
     summary:
-      "A 0 to 100 score for your process, built from six parts: win rate, profit factor, average win vs loss, drawdown, green days and plan adherence. It needs at least 10 trades. It is on the Dashboard and the Progress page.",
+      "A 0 to 100 score for your process, built from six parts: win rate, profit factor, average win vs loss, drawdown, green days and plan adherence. It needs at least 10 trades. It is on the Dashboard and the Progress page. To raise it: follow your plan (tick \"followed my plan\" on trades), set and respect risk rules, use stop-losses, and avoid red days from overtrading.",
   },
   {
     id: "progress",
@@ -334,7 +334,7 @@ export const GUIDE_TOPICS: GuideTopic[] = [
     id: "no-advice",
     title: "Can TradeLens tell me what to buy or sell?",
     href: "/learn/how-to-use-tradelens",
-    keywords: ["tip", "tips", "buy", "sell", "recommend", "target", "prediction", "advice", "which stock", "what to trade", "signal", "call"],
+    keywords: ["tip", "tips", "buy", "sell", "recommend", "target", "prediction", "advice", "which stock", "what to trade", "signal", "call", "should i buy", "should i sell", "what to buy", "what to sell", "stock tip", "price target", "give me a target"],
     summary:
       "No. TradeLens is an educational journaling tool. It reviews your own past trades and habits and never recommends securities, targets or market direction; that would need SEBI registration.",
   },

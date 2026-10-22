@@ -5,6 +5,13 @@ import { COMPLIANCE_GUARDRAIL } from "@/lib/ai/guardrail";
 import { type GuideProgress, type GuideReply, kbAnswer, sanitizeLinks } from "./guide";
 import { knowledgeForPrompt } from "./knowledge";
 
+/** The Guide runs on a free Google model by default (no cost per answer). Override with GUIDE_MODEL (any google/ model). */
+export const FREE_GUIDE_MODEL = "google/gemma-4-31b-it:free";
+const guideModel = () => {
+  const m = process.env.GUIDE_MODEL?.trim();
+  return m && m.startsWith("google/") ? m : FREE_GUIDE_MODEL;
+};
+
 export type GuideTurn = { role: "user" | "assistant"; content: string };
 
 const GuideSchema = z.object({
@@ -67,8 +74,11 @@ export async function askGuideAI(opts: {
     .filter(Boolean)
     .join("\n\n");
 
-  const res = await callStructured({ name: "guide_answer", system, user, schema: GuideSchema, effort: "minimal", maxTokens: 3000 });
+  const model = guideModel();
+  // Free models rarely support strict JSON schemas, so use plain JSON mode and validate ourselves; fail fast to the built-in help.
+  const res = await callStructured({ name: "guide_answer", system, user, schema: GuideSchema, effort: model.endsWith(":free") ? "off" : "minimal", maxTokens: 2000, model, jsonMode: model.endsWith(":free"), retries: 2 });
   if (!res.ok) {
+    console.warn(`[guide] AI failed (${res.reason}): ${res.message.slice(0, 140)}`);
     const note = res.reason === "credits" ? "AI credits are used up, so this answer comes from the built-in help." : "The AI is unavailable right now, so this answer comes from the built-in help.";
     return kbAnswer(opts.question, note);
   }

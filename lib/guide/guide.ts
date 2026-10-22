@@ -40,14 +40,14 @@ export function rankTopics(question: string): RankedTopic[] {
       const kn = stemmed(k);
       if (!kn) continue;
       const n = kn.split(" ").length;
-      if (` ${q} `.includes(` ${kn} `)) score += 3 + Math.min(n - 1, 2); // longer phrase = stronger
-      else if (n === 1 && qw.has(kn)) score += 2;
+      if (` ${q} `.includes(` ${kn} `)) score += n === 1 ? 2 : 3 + Math.min(n - 2, 3); // a phrase beats a lone word; longer phrases are stronger
     }
     const title = new Set(words(topic.title));
     for (const w of qw) if (w.length > 3 && title.has(w)) score += 1;
     return { topic, score };
   })
-    .filter((x) => x.score > 0)
+    // A lone keyword (score 2) is too weak to answer from: better to say "not found" than to guess.
+    .filter((x) => x.score >= 3)
     .sort((a, b) => b.score - a.score);
 }
 

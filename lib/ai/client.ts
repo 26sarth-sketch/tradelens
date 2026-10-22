@@ -72,9 +72,10 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /**
  * One POST to /chat/completions with the Google-only provider block.
- * Retries 429 and 5xx up to 3 times (honouring Retry-After); never retries 402.
+ * Retries 429 and 5xx up to 3 times by default (honouring Retry-After); never retries 402.
  */
-export async function chatCompletion(body: Record<string, unknown>): Promise<{ ok: true; res: ChatResponse; meta: CallMeta } | AiFailure> {
+export async function chatCompletion(body: Record<string, unknown>, opts: { retries?: number } = {}): Promise<{ ok: true; res: ChatResponse; meta: CallMeta } | AiFailure> {
+  const maxRetries = opts.retries ?? 3;
   const missing = notConfigured();
   if (missing) return missing;
   const { apiKey, model } = aiConfig() as { apiKey: string; model: string };
@@ -118,7 +119,7 @@ export async function chatCompletion(body: Record<string, unknown>): Promise<{ o
     } catch {
       status = 0; // network error or timeout: treat like a 5xx
     }
-    if (attempt >= 3) {
+    if (attempt >= maxRetries) {
       return status === 429
         ? { ok: false, reason: "rate_limit", message: "The AI service is rate limited right now. Try again in a minute." }
         : { ok: false, reason: "api", message: "Couldn't reach the AI service (Google via OpenRouter). Try again shortly." };
@@ -134,24 +135,56 @@ function jsonSchemaFor(schema: z.ZodType) {
   return rest;
 }
 
+/** JSON.parse that also copes with a model wrapping its JSON in ```json fences or adding a sentence around it. */
+export function parseJsonLoose(text: string): unknown {
+  const t = text.trim();
+  try {
+    return JSON.parse(t);
+  } catch {
+    const fenced = /```(?:json)?\s*([\s\S]*?)```/i.exec(t)?.[1];
+    if (fenced) return JSON.parse(fenced.trim());
+    const a = t.indexOf("{");
+    const b = t.lastIndexOf("}");
+    if (a >= 0 && b > a) return JSON.parse(t.slice(a, b + 1));
+    throw new SyntaxError("no JSON found");
+  }
+}
+
 /** One structured call: system + user text in, JSON validated against `schema` out. */
 export async function callStructured<S extends z.ZodType>(opts: {
   name: string;
   system: string;
   user: string;
   schema: S;
-  effort?: Effort;
+  /** "off" turns the model's thinking off (faster; for simple tasks on small or free models). */
+  effort?: Effort | "off";
   maxTokens?: number;
+  /** Another google/ model for this call (e.g. a free one). Defaults to OPENROUTER_MODEL. */
+  model?: string;
+  /** For models without strict JSON-schema support: plain JSON mode, schema described in the prompt, validated here. */
+  jsonMode?: boolean;
+  retries?: number;
 }): Promise<AiResult<z.infer<S>>> {
-  const r = await chatCompletion({
-    messages: [
-      { role: "system", content: opts.system },
-      { role: "user", content: opts.user },
-    ],
-    response_format: { type: "json_schema", json_schema: { name: opts.name, strict: true, schema: jsonSchemaFor(opts.schema) } },
-    reasoning: { effort: opts.effort ?? "medium" },
-    max_tokens: opts.maxTokens ?? 16000,
-  });
+  if (opts.model && !opts.model.startsWith("google/")) return { ok: false, reason: "bad_model", message: `Model must be a Google model ("google/…"); got "${opts.model}".` };
+  const schemaJson = jsonSchemaFor(opts.schema);
+  const system = opts.jsonMode
+    ? `${opts.system}\n\nOUTPUT FORMAT: reply with ONLY one JSON object (no markdown, no code fences, no text outside it) that matches this JSON Schema exactly:\n${JSON.stringify(schemaJson)}`
+    : opts.system;
+  const r = await chatCompletion(
+    {
+      ...(opts.model ? { model: opts.model } : {}),
+      messages: [
+        { role: "system", content: system },
+        { role: "user", content: opts.user },
+      ],
+      response_format: opts.jsonMode
+        ? { type: "json_object" }
+        : { type: "json_schema", json_schema: { name: opts.name, strict: true, schema: schemaJson } },
+      reasoning: opts.effort === "off" ? { enabled: false } : { effort: opts.effort ?? "medium" },
+      max_tokens: opts.maxTokens ?? 16000,
+    },
+    { retries: opts.retries },
+  );
   if (!r.ok) return r;
 
   const choice = r.res.choices?.[0];
@@ -163,7 +196,7 @@ export async function callStructured<S extends z.ZodType>(opts: {
   // Providers treat the schema as strict or as a strong hint, so validate it ourselves.
   let parsed: unknown;
   try {
-    parsed = JSON.parse(choice?.message?.content ?? "");
+    parsed = parseJsonLoose(choice?.message?.content ?? "");
   } catch {
     return { ok: false, reason: "parse", message: "The AI returned something unexpected. Please try again." };
   }
