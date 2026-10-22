@@ -8,7 +8,7 @@ Built for NSE/BSE equity (intraday and delivery) and F&O (index and stock future
 
 ---
 
-Documentation (PDF): [docs/TradeLens-Documentation.pdf](docs/TradeLens-Documentation.pdf)
+Documentation (PDF): [docs/TradeLens-Documentation.pdf](docs/TradeLens-Documentation.pdf) · Product tour with screenshots (PDF): [docs/TradeLens-Screenshots.pdf](docs/TradeLens-Screenshots.pdf)
 
 ## Quick start
 
