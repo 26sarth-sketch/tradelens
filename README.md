@@ -62,6 +62,7 @@ The AI Coach uses Google Gemini models through OpenRouter only: the model must s
 - **Zerodha:** Console → Reports → Tradebook → download CSV. Upload on *Add trades → Import broker CSV*.
 - **Upstox, Angel One, Groww, Dhan, others:** upload any tradebook CSV, pick your broker to pre-fill the column mapping, check it, preview, import. (Preset column names are best guesses; check them against a real export.)
 - Sample files: `public/samples/` (Zerodha, Upstox, Groww), also one click from the import screen.
+- **Bigger test file:** `public/samples/tradelens_demo_tradebook.csv` is a Zerodha-format tradebook with 77 fills forming 37 trades over July 2026: wins, revenge re-entries, a 7-trade overtrading day, late entries, expiry-day losses, scaled entries and exits, equity, futures and a delivery hold. It also holds one open position and one commodity row, so you see both import warnings. Expected result: 37 trades, gross ₹6,801, charges ₹3,658, net ₹3,144.
 - Broker API auto-sync (Kite Connect, Upstox, Dhan) is roadmap: the plug-in point is the `BrokerAdapter` interface in `lib/import/adapters/BrokerAdapter.ts`.
 
 ---
