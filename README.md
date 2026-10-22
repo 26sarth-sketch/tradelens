@@ -8,6 +8,8 @@ Built for NSE/BSE equity (intraday and delivery) and F&O (index and stock future
 
 ---
 
+Documentation (PDF): [docs/TradeLens-Documentation.pdf](docs/TradeLens-Documentation.pdf)
+
 ## Quick start
 
 Requires **Node.js 20+** and a free **[Neon](https://neon.tech)** PostgreSQL database.
