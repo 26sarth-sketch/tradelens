@@ -1,15 +1,10 @@
 import "server-only";
-// Screenshot storage on local disk (uploads/, git-ignored), served by
-// app/api/uploads/[file]/route.ts. Swap for S3/R2 in production.
+// Screenshot uploads: validation and naming. Bytes are stored by lib/storage.ts (local disk
+// in dev, private Vercel Blob when deployed) and served by app/api/uploads/[file]/route.ts.
 
 import { randomUUID } from "node:crypto";
-import { mkdir, readFile, unlink, writeFile } from "node:fs/promises";
-import path from "node:path";
+import { deleteFile, getFile, putFile } from "./storage";
 
-// Resolved at runtime. Turbopack statically traces filesystem calls; without the
-// `turbopackIgnore` hints below (and with `path.join(process.cwd(), …)`), it traces the
-// whole project, which in dev caused an endless Fast Refresh reload loop.
-export const UPLOAD_DIR = path.resolve(/* turbopackIgnore: true */ process.env.UPLOAD_DIR ?? "uploads");
 export const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 /** Only names we generate are ever read back: uuid + known image extension. */
 export const SAFE_NAME = /^[0-9a-f-]{36}\.(png|jpg|webp|gif)$/;
@@ -37,21 +32,16 @@ export async function saveImage(file: File): Promise<{ name: string } | { error:
   const ext = sniff(buf);
   if (!ext) return { error: "Screenshot must be a PNG, JPG, WebP or GIF image." };
   const name = `${randomUUID()}.${ext}`;
-  await mkdir(/* turbopackIgnore: true */ UPLOAD_DIR, { recursive: true });
-  await writeFile(/* turbopackIgnore: true */ path.join(/* turbopackIgnore: true */ UPLOAD_DIR, name), buf);
+  await putFile(name, buf, CONTENT_TYPES[ext]);
   return { name };
 }
 
 export async function readImage(name: string): Promise<Buffer | null> {
   if (!SAFE_NAME.test(name)) return null;
-  try {
-    return await readFile(/* turbopackIgnore: true */ path.join(/* turbopackIgnore: true */ UPLOAD_DIR, name));
-  } catch {
-    return null;
-  }
+  return getFile(name);
 }
 
 export async function deleteImage(name: string | null | undefined) {
   if (!name || !SAFE_NAME.test(name)) return;
-  await unlink(/* turbopackIgnore: true */ path.join(/* turbopackIgnore: true */ UPLOAD_DIR, name)).catch(() => {});
+  await deleteFile(name);
 }

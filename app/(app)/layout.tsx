@@ -1,8 +1,11 @@
 import { Footer } from "@/components/layout/Footer";
 import { Sidebar } from "@/components/layout/Sidebar";
 
-// All journal screens read live data from SQLite on every request.
+// All journal screens read live data from the database on every request.
 export const dynamic = "force-dynamic";
+// AI reviews (~10–40 s, more with chat tool rounds) and "Reset to demo data" run as server
+// actions on these pages; allow up to 5 minutes on Vercel (the Hobby plan maximum).
+export const maxDuration = 300;
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (

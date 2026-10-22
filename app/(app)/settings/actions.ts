@@ -1,7 +1,5 @@
 "use server";
 
-import { execFile } from "node:child_process";
-import { promisify } from "node:util";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { BROKERAGE_PLANS, type BrokeragePlanKey } from "@/config/market";
@@ -10,6 +8,7 @@ import { recomputeAllCharges } from "@/lib/recompute";
 import { recomputeBreaches } from "@/lib/rule-store";
 import { LEVELS } from "@/lib/types";
 import { getCurrentUser } from "@/lib/user";
+import { seedDemo } from "@/prisma/seed-core";
 
 export type SettingsState = { ok?: boolean; error?: string; message?: string; savedAt?: number };
 
@@ -75,10 +74,10 @@ export async function recomputeCharges(): Promise<SettingsState> {
   return { ok: true, message: `Charges recalculated on ${n} trades using the current rates in config/market.ts.`, savedAt: Date.now() };
 }
 
-/** Wipes everything and reloads the demo journal (runs the seed script). */
+/** Wipes everything and reloads the demo journal (same code as `npm run db:seed`, run in-process). */
 export async function resetDemoData(): Promise<SettingsState> {
   try {
-    await promisify(execFile)("npx", ["tsx", "prisma/seed.ts"], { cwd: process.cwd(), timeout: 120_000 });
+    await seedDemo(db);
   } catch (e) {
     return { error: `Reset failed: ${e instanceof Error ? e.message.split("\n")[0] : "unknown error"}` };
   }

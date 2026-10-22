@@ -100,14 +100,31 @@ The AI Coach uses Google Gemini models through OpenRouter only: the model must s
 | `npm run set-key` | Save your OpenRouter API key to `.env` from a hidden prompt |
 | `npm run ai:check` | One short test call to the AI model; prints the reply, model and cost |
 | `npm run db:seed` | Wipe and reload the demo data |
+| `npm run db:turso` | One-time setup of the hosted Turso DB: create tables, load demo data (reads `.env.turso`) |
 | `npx tsx scripts/check-seed.ts` | Print the demo patterns (plan vs no plan, expiry, after 2 PM, revenge) |
 | `npm test` | Unit tests (charges, import, stats, reports, rules, score, AI verifier, …) |
 | `npm run typecheck` / `npm run lint` | TypeScript and ESLint |
 | `npm run db:studio` | Browse the database in Prisma Studio |
 
+## Deploy to Vercel
+
+Local dev uses the SQLite file and `uploads/`. Vercel's filesystem is read-only, so the deployed app uses **Turso** (hosted SQLite) and a **private Vercel Blob** store instead. The code switches automatically when the variables below are set.
+
+1. **Turso:** create a database at [turso.tech](https://turso.tech) and an auth token for it. Put both in a new file `.env.turso` (git-ignored):
+   ```
+   TURSO_DATABASE_URL="libsql://<db>-<org>.turso.io"
+   TURSO_AUTH_TOKEN="..."
+   ```
+   Then run `npm run db:turso` once: it creates the tables and loads the demo journal.
+2. **Vercel:** import the GitHub repo (framework: Next.js). In Settings → Environment Variables add `TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN`, `OPENROUTER_API_KEY` (use a separate key with a credit limit) and `OPENROUTER_MODEL=google/gemini-3.7-flash`.
+3. **Blob:** in the Vercel project → Storage → Create → Blob, choose **Private** access and connect it to the project. This adds `BLOB_READ_WRITE_TOKEN`.
+4. Redeploy. The build skips the local SQLite setup on Vercel. AI pages allow up to 300 s per request.
+
+Schema changes later: Prisma Migrate can't reach Turso; generate SQL with `npx prisma migrate diff --from-url file:./prisma/dev.db --to-schema-datamodel prisma/schema.prisma --script` and run it in the Turso dashboard's SQL shell.
+
 ## Tech stack
 
-Next.js 16 (App Router) · TypeScript · Tailwind CSS v4 (dark by default) · SQLite + Prisma 6 · Recharts · Google Gemini via OpenRouter (structured outputs, tool calling, Google-only routing) · Zod.
+Next.js 16 (App Router) · TypeScript · Tailwind CSS v4 (dark by default) · SQLite + Prisma 6 (Turso via the libSQL adapter when deployed) · Vercel Blob for screenshots · Recharts · Google Gemini via OpenRouter (structured outputs, tool calling, Google-only routing) · Zod.
 
 ## Project layout
 

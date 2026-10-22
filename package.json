@@ -16,10 +16,14 @@
     "test": "tsx --test 'lib/**/*.test.ts' 'lib/**/**/*.test.ts'",
     "db:seed": "tsx prisma/seed.ts",
     "set-key": "sh scripts/set-api-key.sh",
-    "ai:check": "tsx --env-file=.env --conditions=react-server scripts/ai-check.ts"
+    "ai:check": "tsx --env-file=.env --conditions=react-server scripts/ai-check.ts",
+    "db:turso": "tsx --env-file=.env.turso scripts/turso-setup.ts"
   },
   "dependencies": {
+    "@libsql/client": "^0.8.1",
+    "@prisma/adapter-libsql": "^6.19.3",
     "@prisma/client": "^6.19.3",
+    "@vercel/blob": "^2.8.2",
     "clsx": "^2.1.1",
     "lucide-react": "^1.61.0",
     "next": "16.4.2",

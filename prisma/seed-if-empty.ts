@@ -1,9 +1,9 @@
 // Called by scripts/setup.mjs before `npm run dev`: seeds demo data only when the DB has no users,
 // so a fresh clone shows a full journal and your own data is never overwritten.
 import { execSync } from "node:child_process";
-import { PrismaClient } from "@prisma/client";
+import { createPrismaClient } from "@/lib/prisma-client";
 
-const db = new PrismaClient();
+const db = createPrismaClient();
 db.user
   .count()
   .then((n) => {
