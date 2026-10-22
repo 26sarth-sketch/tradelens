@@ -126,10 +126,14 @@ export function dayStatus(dayTrades: RuleTrade[], r: RiskLimits, now?: Date): Ru
   if (r.maxTradesPerDay != null) push("TRADE_COUNT", ts.length, r.maxTradesPerDay);
   if (r.maxLossPerTrade != null) push("PER_TRADE_LOSS", Math.max(0, ...ts.map((t) => -t.netPnl)), r.maxLossPerTrade);
   if (r.maxConsecutiveLosses != null) {
-    // Current streak at the end of the day so far.
+    // Longest losing streak so far today (a later win doesn't undo a broken rule).
     let streak = 0;
-    for (const t of ts) streak = t.netPnl <= 0 ? streak + 1 : 0;
-    push("CONSEC_LOSSES", streak, r.maxConsecutiveLosses);
+    let longest = 0;
+    for (const t of ts) {
+      streak = t.netPnl <= 0 ? streak + 1 : 0;
+      longest = Math.max(longest, streak);
+    }
+    push("CONSEC_LOSSES", longest, r.maxConsecutiveLosses);
   }
   if (r.noTradeAfter) {
     const cutoff = toMin(r.noTradeAfter);

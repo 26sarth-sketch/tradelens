@@ -72,20 +72,20 @@ ANTHROPIC_MODEL="claude-opus-5-5"
 | Time | Screen | Say / do |
 |---|---|---|
 | **0:00** | Landing page `/` | "Most Indian F&O traders lose money, and they can't see why. TradeLens is a trading journal built for India." Point at the live hero: charges eat a big share of gross profit; trades that followed the plan made money, the rest lost it. Click **Explore the demo journal**. |
-| **0:15** | Import `/trades/import` | Click **Try the sample file** (Zerodha). "One tradebook upload: fills become complete trades, every Indian charge computed, duplicates skipped." Show the preview, click **Import**. With a key, the AI's first-read card appears on the summary. |
-| **0:35** | Dashboard `/dashboard` | The **Charges ate X% of your gross profit** bar. Switch the view to **R-multiple**, then back to ₹. Point at the **risk widget**: "Today: 4 trades against a limit of 3, flagged." Point at the **red Tuesdays** in the calendar: "Expiry days." Toggle **Privacy mode** to show screen-share safety, then off. |
+| **0:15** | **Add trades** (sidebar) → Import | Click **Try the sample file** (Zerodha). "One tradebook upload: fills become complete trades, every Indian charge computed, duplicates skipped." Show the preview, click **Import**. The summary opens with **What your data says** (the AI's first read with a key; computed patterns without one). |
+| **0:35** | Dashboard `/dashboard` | The **Charges ate X% of your gross profit** bar. Switch the view to **R-multiple**, then back to ₹. Point at the **risk widget**: "Today: several rules broken: too many trades, a big loss, trading after a losing streak." Point at the **red Tuesdays** in the calendar: "Expiry days." Toggle **Privacy mode** to show screen-share safety, then off. |
 | **0:55** | Reports → **Compare** | Preset **Followed plan vs broke plan**: the two curves split apart. "Each trade that followed the plan made ₹X more." Tap **Before 2 PM vs after 2 PM**. |
 | **1:15** | AI Coach `/coach` | Ask **"What's my win rate on expiry days?"** Expand *Numbers computed from your journal* and point at the **verified** badge: "The AI never makes up a number." Then ask **"Which stock should I buy tomorrow?"**: it politely declines (SEBI). |
 | **1:35** | AI Coach → **Session review** | "It compares this morning's plan with what actually happened": rules broken, what went well, tomorrow's focus. |
-| **1:45** | **Progress** `/progress` | Lens Score climbing from the 30s to the 80s as the trader kept journaling; the discipline calendar turning green. "Fix one habit a week." |
+| **1:45** | **Progress** `/progress` | The Lens Score climbing as the trader kept journaling; the discipline calendar turning green week by week. "Fix one habit a week." |
 | **1:55** | Landing → **Pricing** | Free / Pro ₹299 / Elite ₹699. "Freemium, priced for India. Broker auto-sync is next." |
 
-**No AI key?** Skip 1:15–1:35 and show **Trade Log → Auto-tag → Scan my trades** (revenge trades found with reasons, no AI needed), then **Strategies** (every playbook profitable, "No strategy" deep red).
+**No AI key?** Replace 1:15–1:35 with **Trade Log → Auto-tag** (revenge trades and overtrading found with exact reasons, no AI needed: accept one live), then **Notebook** (today's plan vs what happened, every check computed). The import summary's *What your data says* works without a key too.
 
 ### Demo-day checklist
 
 - [ ] **Verify charge rates** in `config/market.ts` (STT, exchange fees, stamp duty, GST) and lot sizes / expiry days against a current broker charges page and NSE/BSE circulars. After editing: Settings → *Recalculate charges*.
-- [ ] `npm run db:seed` on demo morning (only trades that have already closed are loaded for "today").
+- [ ] `npm run db:seed` on demo day, **after 11:00 IST** (only trades that have already closed are loaded for "today"; the 14:45 cut-off breach appears after 15:15). Re-run it after rehearsals so the sample import works fresh.
 - [ ] AI key set (`npm run set-key`), then in AI Coach generate **Journal analysis**, **Session review** (today) and **Weekly review** (this week). They are cached, so the demo is instant.
 - [ ] Try the two demo chat questions once.
 - [ ] Privacy mode **off** (sidebar) before you start.

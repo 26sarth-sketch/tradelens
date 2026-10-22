@@ -11,6 +11,8 @@
 // story criteria in `demoStory()` hold (see prisma/seed.ts).
 
 import { fromIST, istDateKey } from "@/lib/format";
+import { evaluateAll } from "@/lib/rules";
+import { scoreForTrades } from "@/lib/score";
 import { isExpiryDay, nextExpiry } from "@/lib/expiry";
 import type { RawTrade } from "@/lib/trades";
 import type { Emotion } from "@/lib/types";
@@ -127,10 +129,13 @@ export function generateDemo(today: Date, seed = 1) {
     for (const e of EQUITIES) eq[e.symbol] = eq[e.symbol] * (1 + between(-0.012, 0.013));
 
     const expiry = isExpiryDay("NIFTY", dayKey);
-    const hasPlan = chance(0.55 + 0.35 * progress);
+    // "Today" (the last day) always has a plan and breaks it, so the dashboard's risk
+    // widget and the AI session review have something to show on demo day.
+    const isToday = dayIndex === days.length - 1;
+    const hasPlan = isToday || chance(0.45 + 0.5 * progress);
     // Days with a written plan tend to be disciplined days.
     // Expiry days pull in more impulsive, zero-day option trades.
-    const disciplined = expiry ? chance(0.25 + 0.3 * progress) : hasPlan ? chance(0.55 + 0.35 * progress) : chance(0.2 + 0.25 * progress);
+    const disciplined = isToday ? false : expiry ? chance(0.2 + 0.45 * progress) : hasPlan ? chance(0.4 + 0.55 * progress) : chance(0.15 + 0.4 * progress);
     const planMaxTrades = 3;
     const dayStart = fromIST(dayKey, "12:00");
 
@@ -149,14 +154,14 @@ export function generateDemo(today: Date, seed = 1) {
     let count = 0;
     let dayNet = 0;
     // Disciplined days respect the demo trader's risk rules (3 trades, stop after 2 losses, nothing after 14:00).
-    const target = disciplined ? int(2, 3) : expiry ? int(4, 7) : int(2, 4);
+    const target = isToday ? int(4, 5) : disciplined ? int(2, 3) : expiry ? int(4, 7) : int(2, 4);
     let lossStreak = 0;
 
     while (count < target && cursor < (disciplined ? T(14, 0) : T(15, 5))) {
       const late = cursor >= T(14, 0);
       const followed = disciplined && !late && chance(0.85);
       const overLimit = hasPlan && count >= planMaxTrades;
-      const t = makeTrade({ dayKey, minute: cursor, expiry, late, followed, nifty, bankNifty, eq, dayStart });
+      const t = makeTrade({ dayKey, minute: cursor, expiry, late, followed, nifty, bankNifty, eq, dayStart, fast: isToday });
       if (overLimit) {
         t.followedPlan = false;
         if (chance(0.5)) t.tags.push("OVERTRADING");
@@ -165,7 +170,8 @@ export function generateDemo(today: Date, seed = 1) {
       count++;
       const net = approxNet(t);
       dayNet += net;
-      cursor = minutesOf(t.exitAt) + int(8, 55);
+      // Today's trades come quickly so they're all closed by mid-morning.
+      cursor = minutesOf(t.exitAt) + (isToday ? int(3, 12) : int(8, 55));
 
       // Revenge trade: big loss → re-enter within minutes, one lot bigger.
       if (t.segment === "OPT" && net < -1200 && chance(0.6) && cursor < T(15, 10)) {
@@ -223,6 +229,8 @@ type Ctx = {
   bankNifty: number;
   eq: Record<string, number>;
   dayStart: Date;
+  /** Today in the demo: short holds so every trade is closed by late morning. */
+  fast?: boolean;
 };
 
 function minutesOf(d: Date) {
@@ -285,7 +293,7 @@ function makeIndexOption(c: Ctx): DemoTrade {
   }
   move = Math.max(move, -0.85);
   const exit = tick(entry * (1 + move));
-  const hold = win ? int(4, 35) : int(8, 65);
+  const hold = c.fast ? int(5, 15) : win ? int(4, 35) : int(8, 65);
 
   const t: DemoTrade = {
     exchange: "NSE",
@@ -352,7 +360,7 @@ function makeEquityIntraday(c: Ctx): DemoTrade {
     avgEntry: price,
     avgExit: exit,
     entryAt: fromIST(c.dayKey, hhmm(c.minute)),
-    exitAt: fromIST(c.dayKey, hhmm(Math.min(c.minute + int(10, 120), T(15, 15)))),
+    exitAt: fromIST(c.dayKey, hhmm(Math.min(c.minute + (c.fast ? int(8, 15) : int(10, 120)), T(15, 15)))),
     followedPlan: c.followed,
     emotionBefore: emotionBefore(c.followed),
     emotionAfter: win ? "Calm" : "Fearful",
@@ -451,7 +459,39 @@ function makeDeliveryTrades(days: string[], eq: Record<string, number>): DemoTra
 
 // ─── Story check ──────────────────────────────────────────────────────────────
 
-type Built = { netPnl: number; grossPnl: number; totalCharges: number; isExpiryDay: boolean; entryAt: Date };
+type Built = {
+  netPnl: number;
+  grossPnl: number;
+  totalCharges: number;
+  isExpiryDay: boolean;
+  entryAt: Date;
+  exitAt: Date;
+  rMultiple: number | null;
+  points: number | null;
+  underlying: string;
+};
+
+/** The demo trader's standing risk rules (seed.ts writes these to the profile). */
+export const DEMO_LIMITS = {
+  maxDailyLoss: 4000,
+  maxTradesPerDay: 3,
+  maxLossPerTrade: 2000,
+  maxConsecutiveLosses: 2,
+  noTradeAfter: "14:00",
+};
+export const DEMO_CAPITAL = 3_00_000;
+
+/** Lens Score over the first and last 20 trading days (the Progress story). */
+function scoreProgress(src: DemoTrade[], built: Built[]) {
+  const trades = built.map((b, i) => ({ ...b, id: String(i), followedPlan: src[i].followedPlan ?? null }));
+  const breachDates = new Set(evaluateAll(trades, DEMO_LIMITS).map((b) => b.date));
+  const days = [...new Set(trades.map((t) => istDateKey(t.entryAt)))].sort();
+  const window = (ds: string[]) => {
+    const set = new Set(ds);
+    return scoreForTrades(trades.filter((t) => set.has(istDateKey(t.entryAt))), breachDates, DEMO_CAPITAL)?.total ?? 0;
+  };
+  return { first: window(days.slice(0, 20)), last: window(days.slice(-20)) };
+}
 
 /** Summary numbers the demo relies on, computed from built trades. */
 export function demoStory(src: DemoTrade[], built: Built[]) {
@@ -475,17 +515,19 @@ export function demoStory(src: DemoTrade[], built: Built[]) {
     lateAvg: avg(where(late)),
     earlyAvg: avg(where((i) => !late(i))),
     revengeWin: winRate(where((i) => src[i].emotionBefore === "Revenge")),
+    score: scoreProgress(src, built),
   };
 }
 
 /** The story the demo script tells. All must hold. */
 export function isGoodStory(s: ReturnType<typeof demoStory>) {
   return (
-    s.gross >= 35_000 && s.gross <= 90_000 && // profitable before charges…
-    s.chargesPct >= 35 && s.chargesPct <= 70 && // …but charges eat a big share
+    s.gross >= 20_000 && s.gross <= 90_000 && // profitable before charges…
+    s.chargesPct >= 30 && s.chargesPct <= 75 && // …but charges eat a big share
     s.followedWin - s.notFollowedWin >= 0.25 &&
     s.expiryAvg < s.nonExpiryAvg - 600 &&
     s.lateAvg < s.earlyAvg - 800 &&
-    s.revengeWin <= 0.3
+    s.revengeWin <= 0.3 &&
+    s.score.last >= 60 && s.score.last - s.score.first >= 15 // Lens Score improves while journaling
   );
 }

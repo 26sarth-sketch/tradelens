@@ -1,6 +1,7 @@
 import { CheckCircle2, Undo2 } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { QuickRead } from "@/components/coach/QuickRead";
 import { ReportCard } from "@/components/coach/ReportCard";
 import { Card } from "@/components/ui/Card";
 import { aiConfig } from "@/lib/ai/client";
@@ -52,6 +53,7 @@ export default async function ImportSummaryPage({ params }: { params: Promise<{ 
       </div>
 
       <div className="mb-4">
+        {aiConfig().enabled ? (
         <ReportCard
           type="FIRST_IMPORT"
           reportKey={batch.id}
@@ -61,6 +63,9 @@ export default async function ImportSummaryPage({ params }: { params: Promise<{ 
           title="What your data says"
           subtitle="The AI Coach's first read of your journal, including this import."
         />
+        ) : (
+          <QuickRead userId={user.id} />
+        )}
       </div>
 
       <Card title="Trades in this import">

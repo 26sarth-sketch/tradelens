@@ -83,7 +83,9 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   const history = tradingDays.map((date) => ({ date, breaches: breachCount.get(date) ?? 0 }));
 
   const s = computeStats(trades, { view, capital });
-  const score = scoreForTrades(trades, new Set(breaches.map((b) => b.date)), capital);
+  // Same window as Progress and the landing page: the last 20 trading days.
+  const scoreDays = new Set([...new Set(trades.map((t) => istDateKey(t.entryAt)))].sort().slice(-20));
+  const score = scoreForTrades(trades.filter((t) => scoreDays.has(istDateKey(t.entryAt))), new Set(breaches.map((b) => b.date)), capital);
   const days = dailyStats(trades, { view, capital });
   const curve = equityCurve(days);
   const month = /^\d{4}-\d{2}$/.test(sp.month ?? "") ? sp.month! : istDateKey(trades[trades.length - 1].exitAt).slice(0, 7);
@@ -173,7 +175,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         </div>
         <div className="space-y-4">
           <RiskWidget today={today} todayTrades={todayTrades.length} statuses={statuses} history={history} recent={breaches.slice(0, 4)} />
-          <LensScoreCard score={score} scope={range.days ? `Trades from the last ${range.days} days` : "All trades"} />
+          <LensScoreCard score={score} scope="Last 20 trading days" />
         </div>
       </div>
 

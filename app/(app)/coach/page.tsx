@@ -2,6 +2,7 @@ import clsx from "clsx";
 import { KeyRound, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { ChatPanel, type ChatItem } from "@/components/coach/ChatPanel";
+import { QuickRead } from "@/components/coach/QuickRead";
 import { ReportCard } from "@/components/coach/ReportCard";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { aiConfig } from "@/lib/ai/client";
@@ -72,9 +73,11 @@ export default async function CoachPage({ searchParams }: { searchParams: Promis
     );
   } else {
     const cached = await getCachedReport(user.id, "FIRST_IMPORT", "all");
-    body = (
+    body = enabled || cached ? (
       <ReportCard type="FIRST_IMPORT" reportKey="all" initial={cached} aiEnabled={enabled}
         title="What your data says" subtitle="A full read of your journal: what works, where money leaks, and what to do next." />
+    ) : (
+      <QuickRead userId={user.id} />
     );
   }
 

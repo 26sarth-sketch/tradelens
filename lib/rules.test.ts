@@ -65,4 +65,10 @@ describe("dayStatus", () => {
     assert.equal(by.TRADE_COUNT.state, "ok");
     assert.equal(by.PER_TRADE_LOSS.state, "breached");
   });
+
+  it("losing-streak status keeps the day's longest streak after a later win", () => {
+    const s = dayStatus([t(-100, "09:20"), t(-100, "09:40"), t(-100, "10:00"), t(500, "10:20")], { ...OFF, maxConsecutiveLosses: 2 });
+    assert.equal(s[0].current, 3);
+    assert.equal(s[0].state, "breached");
+  });
 });

@@ -7,7 +7,7 @@ import { PrismaClient } from "@prisma/client";
 import { fromIST } from "@/lib/format";
 import { evaluateAll } from "@/lib/rules";
 import { buildTradeData } from "@/lib/trades";
-import { demoStory, generateDemo, isGoodStory, type StrategyKey, type TagKey } from "./demo-data";
+import { DEMO_CAPITAL, DEMO_LIMITS, demoStory, generateDemo, isGoodStory, type StrategyKey, type TagKey } from "./demo-data";
 
 const db = new PrismaClient();
 // Same folder as lib/uploads.ts (not imported: that module is server-only).
@@ -98,16 +98,12 @@ async function main() {
       profile: {
         create: {
           level: "BEGINNER",
-          capital: 3_00_000,
+          capital: DEMO_CAPITAL,
           language: "EN",
           broker: "Zerodha",
           brokeragePlan: "DISCOUNT",
           onboarded: true,
-          maxDailyLoss: 4000,
-          maxTradesPerDay: 3,
-          maxLossPerTrade: 2000,
-          maxConsecutiveLosses: 2,
-          noTradeAfter: "14:00",
+          ...DEMO_LIMITS,
         },
       },
     },
@@ -204,7 +200,7 @@ async function main() {
   console.log(`[seed] ${breaches.length} risk-rule breaches recorded.`);
 
   console.log(
-    `[seed] gross ₹${Math.round(story.gross)}, charges ₹${Math.round(story.charges)} (${story.chargesPct.toFixed(0)}% of gross), net ₹${Math.round(story.net)}`,
+    `[seed] gross ₹${Math.round(story.gross)}, charges ₹${Math.round(story.charges)} (${story.chargesPct.toFixed(0)}% of gross), net ₹${Math.round(story.net)}, Lens Score ${story.score.first} → ${story.score.last}`,
   );
   console.log(
     `[seed] ${closed.length} trades over ${journal.length} days, ${journal.filter((d) => d.plan).length} plans, ${missed.length} missed trades.`,
