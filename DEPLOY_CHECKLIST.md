@@ -143,10 +143,16 @@ Note model and cost from the card footer / server log for each.
 
 | ✓ | Step | Command | Expected |
 |---|------|---------|----------|
-| ☐ | 8.1 Sections 1–2 all ticked | | |
-| ☐ | 8.2 Create repo and push | `gh repo create tradelens --public --source . --push` | Repo URL printed |
-| ☐ | 8.3 Check on github.com | Open repo | README renders; no `.env`, `dev.db`, `uploads/*` files |
-| ☐ | 8.4 Fresh clone works | `git clone <url> /tmp/tl && cd /tmp/tl && npm install && npm run dev` | App runs with demo data, no key needed |
+| ✅ | 8.1 Sections 1–2 all ticked | | |
+| ✅ | 8.2 Create repo and push | `gh repo create tradelens --public --source . --push` | Repo URL printed |
+| ✅ | 8.3 Check on github.com | Open repo | README renders; no `.env`, `dev.db`, `uploads/*` files |
+| ✅ | 8.4 Fresh clone works | `git clone <url> /tmp/tl && cd /tmp/tl && npm install && npm run dev` | App runs with demo data, no key needed |
+
+### Results: section 8 (22 Oct 2026)
+
+- Secrets re-scanned before pushing: no `.env`, `.env.turso`, database or uploads tracked; no OpenRouter key, JWT-style token or Blob token anywhere in history. Commit author is a local machine address, no personal email.
+- Public repo: https://github.com/26sarth-sketch/tradelens (default branch `main`, 221 files, HEAD `c568cf1` matches local).
+- Fresh clone + `npm install && npm run dev`: `.env` created from the example, SQLite set up, demo journal seeded (193 trades), all main pages 200, Coach shows the "add a key" banner.
 
 ## 9. Deploy to Vercel
 
