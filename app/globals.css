@@ -322,3 +322,30 @@ table tbody tr:hover {
     display: none;
   }
 }
+
+/* ───────── Casino background (decorative emoji floating behind the app) ───────── */
+.casino-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+}
+.casino-float {
+  position: absolute;
+  line-height: 1;
+  opacity: 0.26;
+  filter: saturate(0.85);
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+  will-change: transform;
+  animation: casino-bob 26s ease-in-out infinite;
+}
+@keyframes casino-bob {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(var(--r0, 0deg)); }
+  50% { transform: translate3d(var(--dx, 30px), -46px, 0) rotate(var(--r1, 10deg)); }
+}
+/* Fewer floaters on phones. */
+@media (max-width: 767px) {
+  .casino-float:nth-child(n + 13) { display: none; }
+}

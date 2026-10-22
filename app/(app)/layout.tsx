@@ -1,4 +1,5 @@
 import { GuidePanel } from "@/components/guide/GuidePanel";
+import { CasinoBackground } from "@/components/layout/CasinoBackground";
 import { Footer } from "@/components/layout/Footer";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { aiConfig } from "@/lib/ai/client";
@@ -17,6 +18,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <>
       <div className="ambient" aria-hidden />
+      <CasinoBackground />
       <div className="relative z-[1] flex min-h-screen flex-col md:flex-row">
         <Sidebar />
         <div className="flex min-w-0 flex-1 flex-col overflow-x-clip">
