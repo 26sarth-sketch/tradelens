@@ -22,3 +22,7 @@ Choices made where the brief was ambiguous, newest at the bottom. Each one is ea
 | 16 | **Brokerage is per executed order**: a trade stores buy/sell order counts; percentage brokerage splits a side's value evenly across its orders. | Imports give us fill counts; exact per-order values aren't needed for a journal. |
 | 17 | **Default brokerage plan is "DISCOUNT"** (₹20/order or 0.03%, free delivery); "FLAT20" is the alternative, chosen in the profile. | Covers Zerodha/Upstox/Angel One and Dhan/Groww-style plans. |
 | 18 | **Tests use Node's built-in test runner via `tsx`** (`npm test`). | No extra framework to install. |
+| 19 | **Manual entry logs a completed round trip** (entry + exit in one form). Delivery trades get a separate exit date; others exit the same day. | Fast to fill on mobile; open positions aren't tracked in a journal of closed trades. |
+| 20 | **R-multiple = net P&L ÷ (|entry − stop-loss| × qty)**; planned R:R = |target − entry| ÷ |entry − stop-loss|. Both empty without a stop-loss. | Standard definitions; using net P&L keeps charges honest. |
+| 21 | **Every ₹ amount renders through `<Money>`** (class `money`). | Privacy mode can blur all amounts with one CSS rule. |
+| 22 | **Trade Log filters are a plain GET form** (URL params). | Shareable, back-button friendly, works without JS. The global filter bar for Reports comes on Day 2. |

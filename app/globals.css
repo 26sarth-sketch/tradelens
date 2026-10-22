@@ -42,3 +42,20 @@ body {
 .tabular {
   font-variant-numeric: tabular-nums;
 }
+
+/* Shared form controls (Tailwind v4 custom utilities so they can be composed). */
+@utility input {
+  @apply w-full rounded-lg border border-border bg-surface-2 px-3 py-2 text-sm text-fg outline-none placeholder:text-muted/60 focus:border-accent;
+}
+@utility label {
+  @apply mb-1 block text-xs font-medium text-muted;
+}
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-opacity disabled:opacity-50;
+}
+@utility btn-primary {
+  @apply btn bg-accent text-accent-fg hover:opacity-90;
+}
+@utility btn-ghost {
+  @apply btn border border-border text-fg hover:bg-surface-2;
+}
