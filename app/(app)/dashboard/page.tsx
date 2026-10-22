@@ -5,6 +5,7 @@ import { ChargesCallout } from "@/components/dashboard/ChargesCallout";
 import { EquityCurve } from "@/components/dashboard/EquityCurve";
 import { PnlCalendar } from "@/components/dashboard/PnlCalendar";
 import { RiskWidget } from "@/components/dashboard/RiskWidget";
+import { LensScoreCard } from "@/components/score/LensScoreCard";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { Card } from "@/components/ui/Card";
 import { Money } from "@/components/ui/Money";
@@ -14,6 +15,7 @@ import { db } from "@/lib/db";
 import { daysAgo, formatINR, fromIST, istDateKey } from "@/lib/format";
 import { limitsOf } from "@/lib/rule-store";
 import { dayStatus } from "@/lib/rules";
+import { scoreForTrades } from "@/lib/score";
 import { computeStats, dailyStats, equityCurve, VIEW_LABELS, VIEWS, type View } from "@/lib/stats";
 import { getCurrentUser } from "@/lib/user";
 
@@ -38,7 +40,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     where: { userId: user.id, ...(since ? { exitAt: { gte: since } } : {}) },
     select: {
       entryAt: true, exitAt: true, netPnl: true, grossPnl: true, totalCharges: true,
-      rMultiple: true, points: true, underlying: true,
+      rMultiple: true, points: true, underlying: true, followedPlan: true,
     },
     orderBy: { exitAt: "asc" },
   });
@@ -81,6 +83,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   const history = tradingDays.map((date) => ({ date, breaches: breachCount.get(date) ?? 0 }));
 
   const s = computeStats(trades, { view, capital });
+  const score = scoreForTrades(trades, new Set(breaches.map((b) => b.date)), capital);
   const days = dailyStats(trades, { view, capital });
   const curve = equityCurve(days);
   const month = /^\d{4}-\d{2}$/.test(sp.month ?? "") ? sp.month! : istDateKey(trades[trades.length - 1].exitAt).slice(0, 7);
@@ -164,7 +167,10 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
             <EquityCurve data={curve} view={view} />
           </Card>
         </div>
-        <RiskWidget today={today} todayTrades={todayTrades.length} statuses={statuses} history={history} recent={breaches.slice(0, 4)} />
+        <div className="space-y-4">
+          <RiskWidget today={today} todayTrades={todayTrades.length} statuses={statuses} history={history} recent={breaches.slice(0, 4)} />
+          <LensScoreCard score={score} scope={range.days ? `Trades from the last ${range.days} days` : "All trades"} />
+        </div>
       </div>
 
       <Card title="P&L calendar">

@@ -118,17 +118,19 @@ export function generateDemo(today: Date, seed = 1) {
   let bankNifty = 53_400;
   const eq = Object.fromEntries(EQUITIES.map((e) => [e.symbol, e.price as number]));
 
-  for (const dayKey of days) {
+  for (const [dayIndex, dayKey] of days.entries()) {
+    // The trader improves as they keep journaling: 0 → 1 over the 60 days.
+    const progress = dayIndex / Math.max(1, days.length - 1);
     // Index drift so strikes look realistic over time.
     nifty = Math.round(nifty * (1 + between(-0.008, 0.009)));
     bankNifty = Math.round(bankNifty * (1 + between(-0.009, 0.01)));
     for (const e of EQUITIES) eq[e.symbol] = eq[e.symbol] * (1 + between(-0.012, 0.013));
 
     const expiry = isExpiryDay("NIFTY", dayKey);
-    const hasPlan = chance(0.72);
+    const hasPlan = chance(0.55 + 0.35 * progress);
     // Days with a written plan tend to be disciplined days.
     // Expiry days pull in more impulsive, zero-day option trades.
-    const disciplined = expiry ? chance(0.35) : hasPlan ? chance(0.72) : chance(0.3);
+    const disciplined = expiry ? chance(0.25 + 0.3 * progress) : hasPlan ? chance(0.55 + 0.35 * progress) : chance(0.2 + 0.25 * progress);
     const planMaxTrades = 3;
     const dayStart = fromIST(dayKey, "12:00");
 
@@ -146,9 +148,11 @@ export function generateDemo(today: Date, seed = 1) {
     let cursor = T(9, 16) + int(0, 12);
     let count = 0;
     let dayNet = 0;
-    const target = expiry ? int(4, 7) : int(2, 4);
+    // Disciplined days respect the demo trader's risk rules (3 trades, stop after 2 losses, nothing after 14:00).
+    const target = disciplined ? int(2, 3) : expiry ? int(4, 7) : int(2, 4);
+    let lossStreak = 0;
 
-    while (count < target && cursor < T(15, 5)) {
+    while (count < target && cursor < (disciplined ? T(14, 0) : T(15, 5))) {
       const late = cursor >= T(14, 0);
       const followed = disciplined && !late && chance(0.85);
       const overLimit = hasPlan && count >= planMaxTrades;
@@ -172,7 +176,8 @@ export function generateDemo(today: Date, seed = 1) {
         dayNet += approxNet(r);
         cursor = minutesOf(r.exitAt) + int(10, 40);
       }
-      if (hasPlan && disciplined && dayNet < -4000) break; // respected max daily loss
+      lossStreak = net <= 0 ? lossStreak + 1 : 0;
+      if (disciplined && (dayNet < -4000 || lossStreak >= 2)) break; // respected daily loss and losing-streak rules
     }
 
     // Undisciplined afternoons: a "boredom" trade after 2 PM.
@@ -262,7 +267,7 @@ function makeIndexOption(c: Ctx): DemoTrade {
   // Expiry-day NIFTY premiums are cheap and swing hard.
   const cheap = c.expiry && isNifty;
   const entry = tick(cheap ? between(18, 70) : isNifty ? between(85, 190) : between(220, 460));
-  const lots = c.followed ? int(1, 2) : int(1, 2) + (c.expiry && chance(0.5) ? 1 : 0);
+  const lots = c.followed ? 1 : int(1, 2) + (c.expiry && chance(0.5) ? 1 : 0);
 
   const win = chance(winProbability(c));
   let move: number;
