@@ -4,13 +4,16 @@ import Link from "next/link";
 import { ChargesCallout } from "@/components/dashboard/ChargesCallout";
 import { EquityCurve } from "@/components/dashboard/EquityCurve";
 import { PnlCalendar } from "@/components/dashboard/PnlCalendar";
+import { RiskWidget } from "@/components/dashboard/RiskWidget";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { Card } from "@/components/ui/Card";
 import { Money } from "@/components/ui/Money";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { ViewValue } from "@/components/ui/ViewValue";
 import { db } from "@/lib/db";
-import { daysAgo, formatINR, istDateKey } from "@/lib/format";
+import { daysAgo, formatINR, fromIST, istDateKey } from "@/lib/format";
+import { limitsOf } from "@/lib/rule-store";
+import { dayStatus } from "@/lib/rules";
 import { computeStats, dailyStats, equityCurve, VIEW_LABELS, VIEWS, type View } from "@/lib/stats";
 import { getCurrentUser } from "@/lib/user";
 
@@ -61,6 +64,21 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
       </>
     );
   }
+
+  // Risk widget: always about today, regardless of the selected range.
+  const today = istDateKey(new Date());
+  const [todayTrades, breaches] = await Promise.all([
+    db.trade.findMany({
+      where: { userId: user.id, entryAt: { gte: fromIST(today, "00:00"), lte: fromIST(today, "23:59:59") } },
+      select: { id: true, entryAt: true, exitAt: true, netPnl: true },
+    }),
+    db.ruleBreach.findMany({ where: { userId: user.id }, orderBy: [{ date: "desc" }, { createdAt: "desc" }] }),
+  ]);
+  const statuses = dayStatus(todayTrades, limitsOf(user.profile), new Date());
+  const tradingDays = [...new Set(trades.map((t) => istDateKey(t.entryAt)))].sort().slice(-20);
+  const breachCount = new Map<string, number>();
+  for (const b of breaches) breachCount.set(b.date, (breachCount.get(b.date) ?? 0) + 1);
+  const history = tradingDays.map((date) => ({ date, breaches: breachCount.get(date) ?? 0 }));
 
   const s = computeStats(trades, { view, capital });
   const days = dailyStats(trades, { view, capital });
@@ -139,18 +157,19 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         />
       </div>
 
-      <div className="mb-4">
-        <ChargesCallout gross={s.grossPnl} charges={s.totalCharges} />
+      <div className="mb-4 grid gap-4 xl:grid-cols-[1fr_380px]">
+        <div className="min-w-0 space-y-4">
+          <ChargesCallout gross={s.grossPnl} charges={s.totalCharges} />
+          <Card title={`Equity curve · ${VIEW_LABELS[view]}`}>
+            <EquityCurve data={curve} view={view} />
+          </Card>
+        </div>
+        <RiskWidget today={today} todayTrades={todayTrades.length} statuses={statuses} history={history} recent={breaches.slice(0, 4)} />
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-2">
-        <Card title={`Equity curve · ${VIEW_LABELS[view]}`}>
-          <EquityCurve data={curve} view={view} />
-        </Card>
-        <Card title="P&L calendar">
-          <PnlCalendar days={days} month={month} view={view} monthHref={(m) => href({ month: m })} />
-        </Card>
-      </div>
+      <Card title="P&L calendar">
+        <PnlCalendar days={days} month={month} view={view} monthHref={(m) => href({ month: m })} />
+      </Card>
     </>
   );
 }

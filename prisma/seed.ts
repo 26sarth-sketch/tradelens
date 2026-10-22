@@ -5,6 +5,7 @@ import { readdir, unlink } from "node:fs/promises";
 import path from "node:path";
 import { PrismaClient } from "@prisma/client";
 import { fromIST } from "@/lib/format";
+import { evaluateAll } from "@/lib/rules";
 import { buildTradeData } from "@/lib/trades";
 import { demoStory, generateDemo, isGoodStory, type StrategyKey, type TagKey } from "./demo-data";
 
@@ -194,6 +195,13 @@ async function main() {
       },
     });
   }
+
+  // Risk-rule breach history (same engine as the app; lib/rule-store.ts is server-only).
+  const profile = await db.traderProfile.findUniqueOrThrow({ where: { userId: user.id } });
+  const stored = await db.trade.findMany({ where: { userId: user.id }, select: { id: true, entryAt: true, exitAt: true, netPnl: true } });
+  const breaches = evaluateAll(stored, profile);
+  await db.ruleBreach.createMany({ data: breaches.map((b) => ({ ...b, userId: user.id })) });
+  console.log(`[seed] ${breaches.length} risk-rule breaches recorded.`);
 
   console.log(
     `[seed] gross ₹${Math.round(story.gross)}, charges ₹${Math.round(story.charges)} (${story.chargesPct.toFixed(0)}% of gross), net ₹${Math.round(story.net)}`,

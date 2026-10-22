@@ -9,6 +9,7 @@ import { commitImport, type ImportPreview, previewImport } from "@/lib/import/se
 import type { ParseResult } from "@/lib/import/types";
 import { NotZerodhaError, parseZerodhaTradebook } from "@/lib/import/zerodha";
 import type { ImportSource } from "@/lib/types";
+import { recomputeBreaches } from "@/lib/rule-store";
 import { getCurrentUser } from "@/lib/user";
 
 const MAX_BYTES = 10 * 1024 * 1024;
@@ -65,6 +66,7 @@ export async function commitUpload(formData: FormData): Promise<{ error?: string
     parsed: r.parsed,
     plan: user.profile?.brokeragePlan as BrokeragePlanKey | undefined,
   });
+  await recomputeBreaches(user.id);
   revalidatePath("/trades");
   redirect(`/trades/import/${batch.id}`);
 }
@@ -79,6 +81,7 @@ export async function deleteBatch(formData: FormData) {
       db.trade.deleteMany({ where: { batchId: id, userId: user.id } }),
       db.importBatch.delete({ where: { id } }),
     ]);
+    await recomputeBreaches(user.id);
   }
   revalidatePath("/trades");
   redirect("/trades/import?undone=1");

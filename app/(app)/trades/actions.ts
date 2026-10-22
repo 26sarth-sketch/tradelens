@@ -9,6 +9,7 @@ import { fromIST } from "@/lib/format";
 import { buildTradeData, computeR } from "@/lib/trades";
 import { EMOTIONS, EXCHANGES, SEGMENTS } from "@/lib/types";
 import { deleteImage, saveImage } from "@/lib/uploads";
+import { recomputeBreaches } from "@/lib/rule-store";
 import { getCurrentUser } from "@/lib/user";
 
 const optNum = z.preprocess((v) => (v === "" || v == null ? undefined : v), z.coerce.number().optional());
@@ -77,6 +78,7 @@ export async function createTrade(_prev: CreateTradeState, formData: FormData): 
     data: { ...data, userId: user.id, source: "MANUAL", notes: v.notes ?? "" },
   });
 
+  await recomputeBreaches(user.id);
   revalidatePath("/trades");
   redirect(`/trades/${trade.id}?created=1`);
 }
@@ -87,6 +89,7 @@ export async function deleteTrade(formData: FormData) {
   const trade = await db.trade.findFirst({ where: { id, userId: user.id }, select: { screenshot: true } });
   await db.trade.deleteMany({ where: { id, userId: user.id } });
   await deleteImage(trade?.screenshot);
+  await recomputeBreaches(user.id);
   revalidatePath("/trades");
   redirect("/trades");
 }
