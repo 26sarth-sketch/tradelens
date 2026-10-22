@@ -1,5 +1,9 @@
+import { GuidePanel } from "@/components/guide/GuidePanel";
 import { Footer } from "@/components/layout/Footer";
 import { Sidebar } from "@/components/layout/Sidebar";
+import { aiConfig } from "@/lib/ai/client";
+import { getGuideProgress } from "@/lib/guide/progress";
+import { getCurrentUser } from "@/lib/user";
 
 // All journal screens read live data from the database on every request.
 export const dynamic = "force-dynamic";
@@ -7,7 +11,9 @@ export const dynamic = "force-dynamic";
 // actions on these pages; allow up to 5 minutes on Vercel (the Hobby plan maximum).
 export const maxDuration = 300;
 
-export default function AppLayout({ children }: { children: React.ReactNode }) {
+export default async function AppLayout({ children }: { children: React.ReactNode }) {
+  const user = await getCurrentUser();
+  const progress = await getGuideProgress(user.id);
   return (
     <div className="flex min-h-screen flex-col md:flex-row">
       <Sidebar />
@@ -15,6 +21,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 md:px-8">{children}</main>
         <Footer />
       </div>
+      <GuidePanel progress={progress} aiEnabled={aiConfig().enabled} />
     </div>
   );
 }
