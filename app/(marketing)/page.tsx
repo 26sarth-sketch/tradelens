@@ -16,7 +16,6 @@ import {
   Target,
   Upload,
 } from "lucide-react";
-import { Bungee, Press_Start_2P } from "next/font/google";
 import Link from "next/link";
 import { FlipCards, type TellCard } from "@/components/landing/FlipCards";
 import { GameProvider, Watch } from "@/components/landing/GameProvider";
@@ -36,9 +35,6 @@ import "./casino.css";
 export const dynamic = "force-dynamic";
 
 export const metadata = { title: `${APP_NAME}: beat the house. The AI trading journal for Indian traders` };
-
-const sign = Bungee({ weight: "400", subsets: ["latin"], variable: "--font-sign" });
-const arcade = Press_Start_2P({ weight: "400", subsets: ["latin"], variable: "--font-arcade" });
 
 async function demoNumbers() {
   const user = await db.user.findFirst({ include: { profile: true } });
@@ -157,7 +153,7 @@ export default async function LandingPage() {
 
   return (
     <GameProvider>
-      <div className={`casino ${sign.variable} ${arcade.variable} flex min-h-screen flex-col overflow-x-clip`}>
+      <div className="casino flex min-h-screen flex-col overflow-x-clip">
         {/* Header with HUD */}
         <header className="sticky top-0 z-30 border-b border-white/10 bg-[#07090d]/90 backdrop-blur">
           <div className="relative mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6">

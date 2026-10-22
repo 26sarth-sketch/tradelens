@@ -248,7 +248,7 @@ export function ManualTradeForm({ today }: { today: string }) {
       </div>
 
       <aside className="h-fit rounded-xl border border-border bg-surface p-4 lg:sticky lg:top-6">
-        <h2 className="mb-3 text-sm font-medium text-muted">Live P&amp;L preview</h2>
+        <h2 className="mb-3 arcade text-[10px] uppercase leading-4 tracking-wide text-muted">Live P&amp;L preview</h2>
         {preview ? (
           <dl className="tabular space-y-1.5 text-sm">
             <Row label="Gross P&L" value={formatINR(preview.grossPnl, { decimals: true, signed: true })} className={pnlClass(preview.grossPnl)} />

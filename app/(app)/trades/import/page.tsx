@@ -52,7 +52,7 @@ export default async function ImportPage({ searchParams }: { searchParams: Promi
 
       {batches.length > 0 && (
         <section className="mt-8">
-          <h2 className="mb-2 text-sm font-medium text-muted">Recent imports</h2>
+          <h2 className="mb-2 arcade text-[10px] uppercase leading-4 tracking-wide text-muted">Recent imports</h2>
           <ul className="divide-y divide-border rounded-xl border border-border bg-surface text-sm">
             {batches.map((b) => (
               <li key={b.id}>

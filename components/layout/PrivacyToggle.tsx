@@ -38,7 +38,7 @@ export function PrivacyToggle({ compact = false }: { compact?: boolean }) {
       title={on ? "Show ₹ amounts" : "Hide ₹ amounts (privacy mode)"}
       className={clsx(
         "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
-        on ? "bg-warn/15 text-warn" : "text-muted hover:bg-surface-2 hover:text-fg",
+        on ? "bg-warn/15 text-warn" : "text-white/65 hover:bg-white/10 hover:text-fg",
       )}
     >
       <Icon size={18} />

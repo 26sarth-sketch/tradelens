@@ -14,7 +14,7 @@ export function LensScoreCard({ score, compact = false, scope }: { score: LensSc
   return (
     <section className="min-w-0 rounded-xl border border-border bg-surface p-4">
       <div className="mb-2 flex items-center justify-between gap-2">
-        <h2 className="flex items-center gap-1.5 text-sm font-medium text-muted">
+        <h2 className="flex items-center gap-1.5 arcade text-[10px] uppercase leading-4 tracking-wide text-muted">
           {SCORE_NAME}
           <InfoTip learnHref="/learn/lens-score">
             <span className="block font-medium">How is this calculated?</span>

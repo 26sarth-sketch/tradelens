@@ -20,7 +20,7 @@ function NavLink({ item, onNavigate }: { item: NavItem; onNavigate?: () => void 
       onClick={onNavigate}
       className={clsx(
         "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
-        active ? "bg-accent/15 text-fg" : "text-muted hover:bg-surface-2 hover:text-fg",
+        active ? "bg-accent/15 text-fg shadow-[inset_3px_0_0_var(--accent)]" : "text-white/65 hover:bg-white/10 hover:text-fg",
       )}
     >
       <Icon size={18} className={active ? "text-accent" : undefined} />
@@ -31,7 +31,7 @@ function NavLink({ item, onNavigate }: { item: NavItem; onNavigate?: () => void 
 
 function Brand() {
   return (
-    <Link href="/dashboard" className="flex items-center gap-2 px-3 font-semibold tracking-tight">
+    <Link href="/dashboard" className="sign flex items-center gap-2 px-3 text-lg">
       <Aperture size={22} className="text-accent" />
       {APP_NAME}
     </Link>
@@ -44,7 +44,7 @@ function NavBody({ onNavigate }: { onNavigate?: () => void }) {
       <Link
         href="/trades/import"
         onClick={onNavigate}
-        className="mx-1 flex items-center justify-center gap-2 rounded-lg bg-accent px-3 py-2 text-sm font-medium text-accent-fg hover:opacity-90"
+        className="btn-primary mx-1 py-2"
       >
         <Plus size={16} /> Add trades
       </Link>
@@ -53,7 +53,7 @@ function NavBody({ onNavigate }: { onNavigate?: () => void }) {
           <NavLink key={item.href} item={item} onNavigate={onNavigate} />
         ))}
       </nav>
-      <nav className="mt-auto flex flex-col gap-0.5 border-t border-border pt-3">
+      <nav className="mt-auto flex flex-col gap-0.5 border-t border-white/15 pt-3">
         <PrivacyToggle />
         {SECONDARY_NAV.map((item) => (
           <NavLink key={item.href} item={item} onNavigate={onNavigate} />
@@ -69,22 +69,22 @@ export function Sidebar() {
   return (
     <>
       {/* Desktop */}
-      <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col gap-5 border-r border-border bg-surface px-3 py-5 md:flex">
+      <aside className="bg-felt sticky top-0 hidden h-screen w-60 shrink-0 flex-col gap-5 border-r border-white/10 px-3 py-5 md:flex">
         <Brand />
         <NavBody />
       </aside>
 
       {/* Mobile top bar + drawer */}
-      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-border bg-surface px-4 py-3 md:hidden">
+      <header className="bg-felt sticky top-0 z-30 flex items-center justify-between border-b border-white/10 px-4 py-3 md:hidden">
         <Brand />
-        <button aria-label="Open menu" onClick={() => setOpen(true)} className="rounded-md p-1 text-muted">
+        <button aria-label="Open menu" onClick={() => setOpen(true)} className="rounded-md p-1 text-white/70">
           <Menu size={22} />
         </button>
       </header>
       {open && (
         <div className="fixed inset-0 z-40 md:hidden">
           <div className="absolute inset-0 bg-black/60" onClick={() => setOpen(false)} />
-          <aside className="absolute inset-y-0 left-0 flex w-64 flex-col gap-5 bg-surface px-3 py-5">
+          <aside className="bg-felt absolute inset-y-0 left-0 flex w-64 flex-col gap-5 px-3 py-5">
             <div className="flex items-center justify-between">
               <Brand />
               <button aria-label="Close menu" onClick={() => setOpen(false)} className="p-1 text-muted">
