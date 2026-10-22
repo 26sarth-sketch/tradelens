@@ -91,14 +91,14 @@ export default async function ProgressPage() {
         <StatCard label={`Disciplined days (last ${WINDOW})`} value={`${cleanRecent} / ${recentDays.length}`} sub={`${Math.round((cleanRecent / Math.max(1, recentDays.length)) * 100)}% of trading days`} />
       </div>
 
-      <div className="mb-4 grid gap-4 xl:grid-cols-[1fr_360px]">
+      <div className="mb-4 grid grid-cols-1 gap-4 xl:grid-cols-[1fr_360px]">
         <Card title={`${SCORE_NAME} over time (rolling ${WINDOW} trading days)`}>
           <ScoreTrend data={trend} />
         </Card>
         <LensScoreCard score={nowScore} compact scope={`Last ${WINDOW} trading days`} />
       </div>
 
-      <div className="mb-4 grid gap-4 xl:grid-cols-2">
+      <div className="mb-4 grid grid-cols-1 gap-4 xl:grid-cols-2">
         <Card title="Discipline calendar (last 12 weeks)">
           <DisciplineGrid days={days} />
         </Card>

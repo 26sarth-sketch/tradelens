@@ -61,7 +61,7 @@ export default async function JournalDayPage({ params }: { params: Promise<{ dat
           </Card>
         </div>
       ) : (
-        <div className="grid gap-4 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
           <Card title={`${trades.length} trades · ${s.winRate.toFixed(0)}% win rate`} className="lg:col-span-2">
             <ul className="divide-y divide-border text-sm">
               {trades.map((t) => (

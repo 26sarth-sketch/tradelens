@@ -49,7 +49,7 @@ export function StrategyForm({ id, initial }: { id: string | null; initial: Stra
 
   return (
     <form onSubmit={submit} className="space-y-6">
-      <div className="grid gap-4 rounded-xl border border-border bg-surface p-4 md:grid-cols-[1fr_auto]">
+      <div className="grid grid-cols-1 gap-4 rounded-xl border border-border bg-surface p-4 md:grid-cols-[1fr_auto]">
         <div className="space-y-3">
           <label className="block">
             <span className="label">Name</span>
@@ -79,7 +79,7 @@ export function StrategyForm({ id, initial }: { id: string | null; initial: Stra
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
         {GROUPS.map((g) => {
           const list = rules[g.key];
           return (

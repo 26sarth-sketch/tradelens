@@ -87,7 +87,7 @@ export default async function JournalPage({ searchParams }: { searchParams: Prom
                 </div>
               </header>
 
-              <div className="grid gap-4 p-4 md:grid-cols-2">
+              <div className="grid grid-cols-[minmax(0,1fr)] gap-4 p-4 md:grid-cols-2">
                 <div>
                   {ts.length === 0 ? (
                     <p className="text-sm text-muted">No trades this day.</p>

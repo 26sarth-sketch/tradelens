@@ -25,7 +25,7 @@ export function RiskRulesForm({ initial }: { initial: RiskLimits }) {
       className="space-y-4"
     >
       <p className="text-xs text-muted">Leave a box empty to turn that rule off. Saving re-checks your whole history.</p>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {FIELDS.map((f) => (
           <label key={f.key}>
             <span className="label">{f.label}</span>

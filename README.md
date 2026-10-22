@@ -1,59 +1,138 @@
 # TradeLens
 
-An AI-powered trading journal for Indian retail traders: NSE/BSE equity and F&O, true net P&L after Indian charges, and an AI coach for your trading process.
+**The AI trading journal built for Indian traders.** Import your broker tradebook, see your true P&L after every Indian charge, find the habits that cost you money, and let an AI coach help you fix them, one at a time.
 
-> Educational journaling tool. Not investment advice.
+Built for NSE/BSE equity (intraday and delivery) and F&O (index and stock futures and options).
 
-## Setup
+> Educational journaling tool. Not investment advice. The AI coach reviews your own trades and habits only; it never recommends what to buy or sell, gives price targets or predicts markets.
 
-Requires Node.js 20+.
+---
+
+## Quick start
+
+Requires **Node.js 20+**.
 
 ```bash
 npm install
 npm run dev
 ```
 
-Open http://localhost:3000. The first `npm run dev` creates `.env` from `.env.example`, the SQLite database (`prisma/dev.db`), and loads demo data (about 60 trading days for a demo trader, "Aarav").
+Open **http://localhost:3000**. The first run creates `.env` from `.env.example`, creates the SQLite database (`prisma/dev.db`) and loads ~60 trading days of demo data for a sample trader ("Aarav").
 
-To enable the AI Coach, run `npm run set-key` (paste your key at the hidden prompt) or set these in `.env`:
+### Turn on the AI Coach (optional)
+
+Everything except the AI Coach works without a key. To enable it:
+
+```bash
+npm run set-key
+```
+
+Paste your Anthropic API key at the hidden prompt, then restart `npm run dev`. Or edit `.env` directly:
 
 ```
 ANTHROPIC_API_KEY="sk-ant-..."
 ANTHROPIC_MODEL="claude-opus-5-5"
 ```
 
-## Useful scripts
+`.env` is git-ignored. The model is read from `ANTHROPIC_MODEL`; nothing is hardcoded.
+
+---
+
+## What's inside
+
+| Area | What it does |
+|---|---|
+| **Import** | Zerodha Console tradebook in one click; Upstox, Angel One, Groww, Dhan and any other broker via a column mapper with presets. Fills are grouped into round-trip trades, duplicates skipped, open positions flagged, imports can be undone. |
+| **Charges engine** | Brokerage, STT, exchange transaction charges, SEBI fee, stamp duty, GST (and DP charge on delivery sells) per trade. All rates, lot sizes and expiry days live in `config/market.ts`. |
+| **Dashboard** | Net P&L, win rate, profit factor, avg win vs loss, expectancy, max drawdown, charges (and charges as % of gross profit). View in ₹ / % of capital / R-multiple / index points. Equity curve, P&L calendar, risk-rule widget, Lens Score radar, privacy mode. |
+| **Daily Journal & Trade Log** | Day cards with notes; filterable trade log; trade review with strategy checklist, emotions, followed-plan flag, stop-loss/target (R), high/low (money left on the table), notes and chart screenshot. |
+| **Reports** | Day of week, time of day (15/30-min, IST), segment, symbol, strategy, tag, emotion, expiry vs normal days, with a shared filter bar. **Compare** any two sets side by side (6 one-click presets + custom). |
+| **Strategies** | Playbooks as entry/exit/risk checklists; per-strategy stats, R distribution and rule adherence; missed-trades log. |
+| **Risk rules** | Max daily loss, max trades per day, max loss per trade, stop after N losses in a row, no trades after a cut-off. Live status for today + breach history. |
+| **Notebook** | Pre-market plan, automatic plan-vs-actual checks, end-of-day reflection with a discipline rating. |
+| **AI Coach** | Ask-your-journal chat (numbers computed in code via a tool), session review, weekly review, first-import analysis. Every figure the AI writes is checked against your data. Beginner/Intermediate/Expert style; English or Hinglish. |
+| **Lens Score & Progress** | A 0–100 score from six components (formula in `lib/score.ts`), rolling trend, disciplined-day streaks, discipline calendar, weekly table. |
+| **Landing page** | Hero with live numbers from the demo journal, features, AI coach, INR pricing (Free / Pro ₹299 / Elite ₹699, display only), FAQ. |
+
+### Importing trades
+
+- **Zerodha:** Console → Reports → Tradebook → download CSV. Upload on *Add trades → Import broker CSV*.
+- **Upstox, Angel One, Groww, Dhan, others:** upload any tradebook CSV, pick your broker to pre-fill the column mapping, check it, preview, import. (Preset column names are best guesses; check them against a real export.)
+- Sample files: `public/samples/` (Zerodha, Upstox, Groww), also one click from the import screen.
+- Broker API auto-sync (Kite Connect, Upstox, Dhan) is roadmap: the plug-in point is the `BrokerAdapter` interface in `lib/import/adapters/BrokerAdapter.ts`.
+
+---
+
+## 2-minute demo script
+
+**Before you start:** run `npm run db:seed` (fresh data for "today"), start `npm run dev`, open the landing page at ~110% zoom. If the AI key is set, pre-generate the AI reports (see checklist) so nothing waits on the network. Exact numbers vary with the seed date; the script points at *what* to show.
+
+| Time | Screen | Say / do |
+|---|---|---|
+| **0:00** | Landing page `/` | "Most Indian F&O traders lose money, and they can't see why. TradeLens is a trading journal built for India." Point at the live hero: charges eat a big share of gross profit; trades that followed the plan made money, the rest lost it. Click **Explore the demo journal**. |
+| **0:15** | Import `/trades/import` | Click **Try the sample file** (Zerodha). "One tradebook upload: fills become complete trades, every Indian charge computed, duplicates skipped." Show the preview, click **Import**. With a key, the AI's first-read card appears on the summary. |
+| **0:35** | Dashboard `/dashboard` | The **Charges ate X% of your gross profit** bar. Switch the view to **R-multiple**, then back to ₹. Point at the **risk widget**: "Today: 4 trades against a limit of 3, flagged." Point at the **red Tuesdays** in the calendar: "Expiry days." Toggle **Privacy mode** to show screen-share safety, then off. |
+| **0:55** | Reports → **Compare** | Preset **Followed plan vs broke plan**: the two curves split apart. "Each trade that followed the plan made ₹X more." Tap **Before 2 PM vs after 2 PM**. |
+| **1:15** | AI Coach `/coach` | Ask **"What's my win rate on expiry days?"** Expand *Numbers computed from your journal* and point at the **verified** badge: "The AI never makes up a number." Then ask **"Which stock should I buy tomorrow?"**: it politely declines (SEBI). |
+| **1:35** | AI Coach → **Session review** | "It compares this morning's plan with what actually happened": rules broken, what went well, tomorrow's focus. |
+| **1:45** | **Progress** `/progress` | Lens Score climbing from the 30s to the 80s as the trader kept journaling; the discipline calendar turning green. "Fix one habit a week." |
+| **1:55** | Landing → **Pricing** | Free / Pro ₹299 / Elite ₹699. "Freemium, priced for India. Broker auto-sync is next." |
+
+**No AI key?** Skip 1:15–1:35 and show **Strategies** instead (every playbook profitable, "No strategy" deep red) and the **Notebook** plan-vs-actual checks.
+
+### Demo-day checklist
+
+- [ ] **Verify charge rates** in `config/market.ts` (STT, exchange fees, stamp duty, GST) and lot sizes / expiry days against a current broker charges page and NSE/BSE circulars. After editing: Settings → *Recalculate charges*.
+- [ ] `npm run db:seed` on demo morning (only trades that have already closed are loaded for "today").
+- [ ] AI key set (`npm run set-key`), then in AI Coach generate **Journal analysis**, **Session review** (today) and **Weekly review** (this week). They are cached, so the demo is instant.
+- [ ] Try the two demo chat questions once.
+- [ ] Privacy mode **off** (sidebar) before you start.
+
+---
+
+## Scripts
 
 | Script | What it does |
 |---|---|
-| `npm run dev` | Start the app (sets up `.env` and the DB first) |
+| `npm run dev` | Start the app (creates `.env`, syncs the DB, seeds an empty DB) |
+| `npm run set-key` | Save your Anthropic API key to `.env` from a hidden prompt |
 | `npm run db:seed` | Wipe and reload the demo data |
 | `npx tsx scripts/check-seed.ts` | Print the demo patterns (plan vs no plan, expiry, after 2 PM, revenge) |
-| `npm test` | Unit tests (charges engine, expiry, trade builder) |
-| `npm run typecheck` | TypeScript check |
+| `npm test` | Unit tests (charges, import, stats, reports, rules, score, AI verifier, …) |
+| `npm run typecheck` / `npm run lint` | TypeScript and ESLint |
 | `npm run db:studio` | Browse the database in Prisma Studio |
+
+## Tech stack
+
+Next.js 16 (App Router) · TypeScript · Tailwind CSS v4 (dark by default) · SQLite + Prisma 6 · Recharts · Anthropic SDK (Claude: structured outputs, tool use, refusal fallbacks) · Zod.
 
 ## Project layout
 
 ```
-app/(marketing)   Landing page
-app/(app)         The journal (sidebar layout)
-components/       UI, layout, charts
-config/           brand.ts (names), market.ts (charges, lot sizes; verify before demo)
-lib/              db, formatting (₹ en-IN, IST), stats, charges, import, AI
-prisma/           schema + seed
+app/(marketing)      Landing page with INR pricing
+app/(app)            The journal: dashboard, journal, trades, import, reports, strategies,
+                     notebook, coach, progress, settings
+app/api/uploads      Serves trade screenshots from uploads/
+components/          UI by area (dashboard, trades, reports, coach, score, …)
+config/brand.ts      App and score names (rename here)
+config/market.ts     ALL charge rates, lot sizes, expiry rules (verify before demo)
+lib/charges.ts       Charges engine (pure, unit-tested)
+lib/import/          Zerodha + generic CSV parsers, round-trip grouping, BrokerAdapter note
+lib/stats.ts         Stats in ₹ / % / R / points
+lib/reports.ts       Report groupings · lib/compare.ts · lib/filters.ts
+lib/rules.ts         Risk-rule engine · lib/plan.ts (plan vs actual)
+lib/score.ts         Lens Score formula · lib/progress.ts
+lib/ai/              Claude client, guardrail, prompts, schemas, context, number verifier
+prisma/              Schema, seed and demo-data generator
+DECISIONS.md         Every judgement call made while building, with reasons
 ```
 
-## Importing trades
+## How the AI stays honest
 
-- **Zerodha:** Console → Reports → Tradebook → CSV. Upload on *Add trades → Import*.
-- **Upstox, Angel One, Groww, Dhan, others:** upload any tradebook CSV, pick your broker to pre-fill the column mapping, check it, preview, import.
-- Sample files for the demo live in `public/samples/`.
-- Every import groups fills into round-trip trades, computes Indian charges, skips fills already imported, and can be undone.
-- Broker API auto-sync (Kite Connect, Upstox, Dhan) is roadmap: see the `BrokerAdapter` interface in `lib/import/adapters/BrokerAdapter.ts`.
+1. **Guardrail in every system prompt** (`lib/ai/guardrail.ts`): process and behaviour coaching only; no buy/sell/hold, targets, levels or predictions.
+2. **Numbers come from code.** Reports get stats computed in `lib/stats.ts`; the chat calls a `query_journal` tool that runs our code. The model only explains.
+3. **Every figure is checked** (`lib/ai/verify.ts`): each ₹ / % / R value in a response must match the data at the precision written, or the UI flags it.
 
-## Demo script
+## Roadmap (not in this build)
 
-_Added on Day 2._
-
-See `DECISIONS.md` for choices made along the way.
+Broker API auto-sync (Kite Connect, Upstox, Dhan), backtesting, trade replay, live market data, payments, tax (ITR) reports, mentor sharing and communities, mobile app.

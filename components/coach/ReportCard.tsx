@@ -42,7 +42,7 @@ function FirstImportView({ r }: { r: FirstImport }) {
   return (
     <div className="space-y-5">
       <p className="text-sm">{r.summary}</p>
-      <div className="grid gap-5 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
         <Section title="What's working"><InsightList items={r.strengths} tone="good" /></Section>
         <Section title="Where money leaks"><InsightList items={r.leaks} tone="bad" /></Section>
       </div>
@@ -54,7 +54,7 @@ function FirstImportView({ r }: { r: FirstImport }) {
 function WeeklyView({ r }: { r: Weekly }) {
   return (
     <div className="space-y-5">
-      <div className="grid gap-5 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
         <Section title="Top 3 strengths"><InsightList items={r.strengths} tone="good" /></Section>
         <Section title="Top 3 mistakes"><InsightList items={r.mistakes} tone="bad" /></Section>
       </div>
@@ -98,7 +98,7 @@ function SessionView({ r }: { r: Session }) {
           </ul>
         </Section>
       )}
-      <div className="grid gap-5 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
         <Section title="Went well">
           <ul className="space-y-1.5">{r.went_well.map((x, i) => <li key={i} className="flex gap-2 text-sm"><CheckCircle2 size={16} className="mt-0.5 shrink-0 text-profit" aria-hidden />{x}</li>)}</ul>
         </Section>

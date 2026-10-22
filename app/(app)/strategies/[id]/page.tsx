@@ -86,7 +86,7 @@ export default async function StrategyPage({ params }: { params: Promise<{ id: s
             <StatCard label="Avg R" value={dist.avgR != null ? `${dist.avgR >= 0 ? "+" : ""}${dist.avgR.toFixed(2)}R` : "—"} sub={`${dist.withR} with stop-loss`} />
             <StatCard label="Max drawdown" value={<Money value={-stats.maxDrawdown} className="text-loss" />} />
           </div>
-          <div className="mb-4 grid gap-4 xl:grid-cols-2">
+          <div className="mb-4 grid grid-cols-1 gap-4 xl:grid-cols-2">
             <Card title="Equity curve"><EquityCurve data={curve} view="inr" /></Card>
             <Card title="R-multiple distribution"><RHistogram dist={dist} /></Card>
           </div>
@@ -137,7 +137,7 @@ export default async function StrategyPage({ params }: { params: Promise<{ id: s
         </div>
       </Card>
 
-      <div className="grid gap-4 xl:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         <Card title="Recent trades">
           {trades.length === 0 ? <p className="text-sm text-muted">None yet.</p> : (
             <ul className="divide-y divide-border text-sm">

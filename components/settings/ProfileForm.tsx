@@ -33,7 +33,7 @@ export function ProfileForm({
     >
       <input type="hidden" name="level" value={level} />
       <input type="hidden" name="language" value={language} />
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <label>
           <span className="label">Your name</span>
           <input name="name" defaultValue={initial.name} maxLength={60} className="input" />
@@ -47,7 +47,7 @@ export function ProfileForm({
 
       <div>
         <span className="label">Experience level (the AI coach adapts to this)</span>
-        <div className="grid gap-2 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
           {(Object.keys(LEVEL_INFO) as Level[]).map((l) => (
             <button
               key={l}
@@ -63,7 +63,7 @@ export function ProfileForm({
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div>
           <span className="label">Coach language</span>
           <div className="flex rounded-lg border border-border bg-surface-2 p-0.5">

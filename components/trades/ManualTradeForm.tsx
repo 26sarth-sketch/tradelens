@@ -108,7 +108,7 @@ export function ManualTradeForm({ today }: { today: string }) {
         const data = new FormData(e.currentTarget);
         startTransition(() => action(data));
       }}
-      className="grid gap-6 lg:grid-cols-[1fr_320px]"
+      className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]"
     >
       <div className="@container space-y-5 rounded-xl border border-border bg-surface p-4 sm:p-5">
         <input type="hidden" name="segment" value={segment} />

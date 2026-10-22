@@ -57,7 +57,7 @@ export default async function StrategiesPage() {
         actions={<Link href="/strategies/new" className="btn-primary"><Plus size={16} /> New strategy</Link>}
       />
 
-      <div className="mb-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
         {cards.map((c) => {
           const s = computeStats(c.trades, { capital: user.profile?.capital });
           const r = rDistribution(c.trades.map((t) => t.rMultiple));

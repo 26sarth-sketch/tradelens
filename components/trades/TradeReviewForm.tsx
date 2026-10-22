@@ -139,7 +139,7 @@ export function TradeReviewForm({
 
   return (
     <form onSubmit={submit} className="space-y-6">
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Section title="Strategy" hint={strategy && allRules.length > 0 ? `${metCount} of ${allRules.length} rules met` : undefined}>
           <select
             value={strategyId}
@@ -255,7 +255,7 @@ export function TradeReviewForm({
         </div>
       </Section>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Section title="Risk plan" hint="Stop-loss gives you R">
           <div className="grid grid-cols-2 gap-3">
             <label>
@@ -309,7 +309,7 @@ export function TradeReviewForm({
         </Section>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Section title="Notes">
           <textarea
             name="notes"

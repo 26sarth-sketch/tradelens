@@ -74,7 +74,7 @@ export default async function NotebookPage({ searchParams }: { searchParams: Pro
         {date !== today && <Link href="/notebook" className="text-sm text-accent hover:underline">Back to today</Link>}
       </form>
 
-      <div className="mb-4 grid gap-4 lg:grid-cols-[1.3fr_1fr]">
+      <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-[1.3fr_1fr]">
         <Card title="Pre-market plan">
           {/* key: remount with fresh defaults when the date changes */}
           <PlanForm key={date} date={date} initial={planInitial} strategies={strategies} />
@@ -109,7 +109,7 @@ export default async function NotebookPage({ searchParams }: { searchParams: Pro
         </Card>
       </div>
 
-      <div className="mb-4 grid gap-4 lg:grid-cols-[1.3fr_1fr]">
+      <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-[1.3fr_1fr]">
         <Card title="End-of-day reflection">
           <ReflectionForm
             key={date}

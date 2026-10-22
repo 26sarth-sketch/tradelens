@@ -8,7 +8,7 @@ export function Card({ title, children, className, actions }: {
   actions?: ReactNode;
 }) {
   return (
-    <section className={clsx("rounded-xl border border-border bg-surface p-4", className)}>
+    <section className={clsx("min-w-0 rounded-xl border border-border bg-surface p-4", className)}>
       {(title || actions) && (
         <div className="mb-3 flex items-center justify-between gap-2">
           {title && <h2 className="text-sm font-medium text-muted">{title}</h2>}

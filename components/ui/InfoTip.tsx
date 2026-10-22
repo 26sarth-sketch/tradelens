@@ -11,7 +11,7 @@ export function InfoTip({ children, learnHref }: { children: ReactNode; learnHre
       </button>
       <span
         role="tooltip"
-        className="pointer-events-none invisible absolute left-1/2 top-5 z-20 w-64 -translate-x-1/2 rounded-lg border border-border bg-surface-2 p-3 text-xs font-normal normal-case leading-relaxed tracking-normal text-fg opacity-0 shadow-xl transition-opacity group-focus-within:pointer-events-auto group-focus-within:visible group-focus-within:opacity-100 group-hover:pointer-events-auto group-hover:visible group-hover:opacity-100"
+        className="pointer-events-none invisible absolute left-1/2 top-5 z-20 w-64 max-w-[calc(100vw-2rem)] -translate-x-1/2 rounded-lg border border-border bg-surface-2 p-3 text-xs font-normal normal-case leading-relaxed tracking-normal text-fg opacity-0 shadow-xl transition-opacity group-focus-within:pointer-events-auto group-focus-within:visible group-focus-within:opacity-100 group-hover:pointer-events-auto group-hover:visible group-hover:opacity-100"
       >
         {children}
         {learnHref && (

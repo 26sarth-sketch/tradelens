@@ -84,7 +84,7 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
           {FILTER_KEYS.filter((k) => base[k] != null).map((k) => (
             <input key={k} type="hidden" name={k} value={String(Array.isArray(base[k]) ? (base[k] as string[]).join(",") : base[k])} />
           ))}
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <SetFields prefix="a." name={A.name} filter={A.filter} swatch="var(--series-a)" />
             <SetFields prefix="b." name={B.name} filter={B.filter} swatch="var(--series-b)" />
           </div>
@@ -92,7 +92,7 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
         </form>
       </details>
 
-      <div className="mb-4 grid gap-3 md:grid-cols-2">
+      <div className="mb-4 grid grid-cols-1 gap-3 md:grid-cols-2">
         {[
           { key: "A", set: A, s: sa, color: "var(--series-a)" },
           { key: "B", set: B, s: sb, color: "var(--series-b)" },
@@ -121,7 +121,7 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
         </div>
       )}
 
-      <div className="grid gap-4 xl:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         <div className="overflow-x-auto rounded-xl border border-border bg-surface">
           <table className="tabular w-full min-w-[520px] text-sm">
             <thead className="border-b border-border text-left text-xs uppercase tracking-wide text-muted">

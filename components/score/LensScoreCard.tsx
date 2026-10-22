@@ -12,7 +12,7 @@ function tone(score: number) {
 /** Lens Score: big number, grade, radar, and a readable list of the six components. */
 export function LensScoreCard({ score, compact = false, scope }: { score: LensScore | null; compact?: boolean; scope?: string }) {
   return (
-    <section className="rounded-xl border border-border bg-surface p-4">
+    <section className="min-w-0 rounded-xl border border-border bg-surface p-4">
       <div className="mb-2 flex items-center justify-between gap-2">
         <h2 className="flex items-center gap-1.5 text-sm font-medium text-muted">
           {SCORE_NAME}

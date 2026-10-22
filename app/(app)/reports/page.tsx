@@ -100,7 +100,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
           </div>
 
           {insights && (
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <Insight tone="profit" title={`Best: ${insights.best.label}`}>
                 <Money value={insights.best.stats.net} pnl /> over {insights.best.stats.count} trades · {insights.best.stats.winRate.toFixed(0)}% wins
               </Insight>

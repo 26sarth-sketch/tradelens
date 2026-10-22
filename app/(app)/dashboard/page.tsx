@@ -128,7 +128,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         />
         <StatCard
           label="Avg win vs avg loss"
-          value={<span className="flex items-baseline gap-1.5 text-xl"><ViewValue view={view} value={s.avgWin} className="text-profit" /><span className="text-muted">/</span><ViewValue view={view} value={-s.avgLoss} className="text-loss" /></span>}
+          value={<span className="flex flex-wrap items-baseline gap-x-1.5 text-lg sm:text-xl"><ViewValue view={view} value={s.avgWin} className="text-profit" /><span className="text-muted">/</span><ViewValue view={view} value={-s.avgLoss} className="text-loss" /></span>}
           sub={s.winLossRatio != null ? `Ratio ${s.winLossRatio.toFixed(2)} : 1` : undefined}
           info="Average winning trade vs average losing trade. If your average loss is bigger than your average win, you need a high win rate just to break even."
         />
@@ -160,7 +160,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         />
       </div>
 
-      <div className="mb-4 grid gap-4 xl:grid-cols-[1fr_380px]">
+      <div className="mb-4 grid grid-cols-1 gap-4 xl:grid-cols-[1fr_380px]">
         <div className="min-w-0 space-y-4">
           <ChargesCallout gross={s.grossPnl} charges={s.totalCharges} />
           <Card title={`Equity curve · ${VIEW_LABELS[view]}`}>

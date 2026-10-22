@@ -86,7 +86,7 @@ export default async function TradeDetailPage({
         </div>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <Card title="Execution" className="lg:col-span-2">
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             <Stat label="Quantity" hint={t.lots ? `${formatNumber(t.lots, t.lots % 1 ? 2 : 0)} lot × ${t.lotSize}` : undefined}>

@@ -25,7 +25,7 @@ export function ReflectionForm({
       }}
       className="space-y-4"
     >
-      <div className="grid gap-3 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
         <label className="block">
           <span className="label">What went well?</span>
           <textarea name="eodWentWell" rows={4} defaultValue={initial.eodWentWell} className="input" placeholder="Process wins count, even on a red day." />
