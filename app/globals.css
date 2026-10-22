@@ -67,6 +67,14 @@ html[data-privacy] .money {
 }
 /* Recharts 3 renders tick labels in their own layer, separate from the axis. */
 html[data-privacy] .money-chart .recharts-yAxis-tick-labels,
+html[data-privacy] .money-chart-x .recharts-xAxis-tick-labels,
 html[data-privacy] .money-chart .recharts-tooltip-wrapper {
   filter: blur(7px);
+}
+
+/* Two-series comparison colours (categorical slots 1–2, dark steps; validated
+   against --surface with the dataviz palette validator: CVD ΔE 26.8, contrast ≥ 3:1). */
+:root {
+  --series-a: #3987e5;
+  --series-b: #d95926;
 }
