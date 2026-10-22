@@ -1,11 +1,18 @@
+import { MoneyText } from "@/components/ui/MoneyText";
 /**
  * Minimal renderer for coach and lesson text: paragraphs, "- " bullet lists (also
- * directly under a heading line) and **bold**. Renders text only, never HTML.
+ * directly under a heading line), **bold** and *italic*. Renders text only, never HTML.
  */
 export function RichText({ text, className }: { text: string; className?: string }) {
   const inline = (s: string) =>
-    s.split(/(\*\*[^*]+\*\*)/g).map((part, i) =>
-      part.startsWith("**") && part.endsWith("**") ? <strong key={i}>{part.slice(2, -2)}</strong> : <span key={i}>{part}</span>,
+    s.split(/(\*\*[^*]+\*\*|\*[^*\s][^*]*\*)/g).map((part, i) =>
+      part.startsWith("**") && part.endsWith("**") ? (
+        <strong key={i}><MoneyText text={part.slice(2, -2)} /></strong>
+      ) : part.length > 2 && part.startsWith("*") && part.endsWith("*") ? (
+        <em key={i}><MoneyText text={part.slice(1, -1)} /></em>
+      ) : (
+        <span key={i}><MoneyText text={part} /></span>
+      ),
     );
   const isBullet = (l: string) => /^\s*[-•*]\s+/.test(l);
 

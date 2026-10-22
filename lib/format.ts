@@ -65,6 +65,13 @@ export function formatDateTimeIST(d: Date | string): string {
 }
 
 /** Calendar day key in IST, e.g. "2026-10-22". Used to group trades by trading day. */
+/** A real calendar day as "YYYY-MM-DD" (rejects 2026-13-45 and 2026-02-30). */
+export function isDayKey(s: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
+  const d = new Date(`${s}T00:00:00Z`);
+  return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === s;
+}
+
 export function istDateKey(d: Date | string): string {
   const shifted = new Date(new Date(d).getTime() + IST_OFFSET_MIN * 60_000);
   return shifted.toISOString().slice(0, 10);

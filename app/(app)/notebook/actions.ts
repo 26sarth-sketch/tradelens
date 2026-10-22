@@ -5,10 +5,10 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { EMOTIONS } from "@/lib/types";
 import { getCurrentUser } from "@/lib/user";
+import { isDayKey } from "@/lib/format";
 
 export type NotebookState = { ok?: boolean; error?: string; savedAt?: number };
 
-const DAY = /^\d{4}-\d{2}-\d{2}$/;
 const optPositive = z.preprocess((v) => (v === "" || v == null ? null : v), z.coerce.number().positive().nullable());
 const optInt = z.preprocess((v) => (v === "" || v == null ? null : v), z.coerce.number().int().positive().nullable());
 
@@ -21,7 +21,7 @@ const PlanSchema = z.object({
 });
 
 export async function savePlan(date: string, _prev: NotebookState, formData: FormData): Promise<NotebookState> {
-  if (!DAY.test(date)) return { error: "Invalid date" };
+  if (!isDayKey(date)) return { error: "Invalid date" };
   const parsed = PlanSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { error: "Max trades and max loss must be positive numbers." };
   const user = await getCurrentUser();
@@ -50,7 +50,7 @@ const ReflectionSchema = z.object({
 });
 
 export async function saveReflection(date: string, _prev: NotebookState, formData: FormData): Promise<NotebookState> {
-  if (!DAY.test(date)) return { error: "Invalid date" };
+  if (!isDayKey(date)) return { error: "Invalid date" };
   const parsed = ReflectionSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { error: "Please check the reflection." };
   const user = await getCurrentUser();

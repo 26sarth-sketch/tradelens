@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/db";
-import { fromIST } from "@/lib/format";
+import { fromIST, isDayKey } from "@/lib/format";
 import { getCurrentUser } from "@/lib/user";
 
 const ruleList = (prefix: string) =>
@@ -82,7 +82,7 @@ export async function deleteStrategy(formData: FormData) {
 const optNum = z.preprocess((v) => (v === "" || v == null ? undefined : v), z.coerce.number().optional());
 
 const MissedSchema = z.object({
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Pick a date"),
+  date: z.string().refine(isDayKey, "Pick a date"),
   strategyId: z.string().optional(),
   symbol: z.string().trim().min(1, "Which symbol?").max(40),
   reason: z.string().trim().max(300).default(""),

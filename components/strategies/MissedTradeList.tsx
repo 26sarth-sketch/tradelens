@@ -3,6 +3,7 @@ import { deleteMissedTrade } from "@/app/(app)/strategies/actions";
 import { ConfirmButton } from "@/components/ui/ConfirmButton";
 import { Money } from "@/components/ui/Money";
 import { formatDateIST } from "@/lib/format";
+import { MoneyText } from "@/components/ui/MoneyText";
 
 type Missed = { id: string; date: Date; symbol: string; reason: string; hypotheticalPnl: number | null; strategy: { name: string; color: string } | null };
 
@@ -24,7 +25,7 @@ export function MissedTradeList({ items, showStrategy = true }: { items: Missed[
                   </span>
                 )}
               </div>
-              {m.reason && <p className="truncate text-xs text-muted">{m.reason}</p>}
+              {m.reason && <p className="truncate text-xs text-muted"><MoneyText text={m.reason} /></p>}
             </div>
             <div className="flex shrink-0 items-center gap-2">
               {m.hypotheticalPnl != null && <Money value={m.hypotheticalPnl} pnl />}

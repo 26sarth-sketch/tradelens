@@ -10,7 +10,7 @@ import { type ChatFacts, getCachedReport } from "@/lib/ai/coach";
 import { weekStart } from "@/lib/ai/context";
 import { DISCLAIMER_SHORT } from "@/lib/ai/guardrail";
 import { db } from "@/lib/db";
-import { formatDateIST, istDateKey } from "@/lib/format";
+import { formatDateIST, isDayKey, istDateKey } from "@/lib/format";
 import { getCurrentUser } from "@/lib/user";
 
 export const metadata = { title: "AI Coach" };
@@ -23,7 +23,6 @@ const TABS = [
 ] as const;
 type Tab = (typeof TABS)[number]["key"];
 
-const DAY = /^\d{4}-\d{2}-\d{2}$/;
 const addDays = (d: string, n: number) => {
   const x = new Date(`${d}T00:00:00Z`);
   x.setUTCDate(x.getUTCDate() + n);
@@ -39,8 +38,8 @@ export default async function CoachPage({ searchParams }: { searchParams: Promis
   // Latest trading day with trades, for the session review default.
   const lastTrade = await db.trade.findFirst({ where: { userId: user.id }, orderBy: { entryAt: "desc" }, select: { entryAt: true } });
   const lastDay = lastTrade ? istDateKey(lastTrade.entryAt) : today;
-  const sessionDate = sp.date && DAY.test(sp.date) ? sp.date : lastDay;
-  const monday = sp.week && DAY.test(sp.week) ? weekStart(sp.week) : weekStart(lastDay);
+  const sessionDate = sp.date && isDayKey(sp.date) ? sp.date : lastDay;
+  const monday = sp.week && isDayKey(sp.week) ? weekStart(sp.week) : weekStart(lastDay);
 
   let body: React.ReactNode = null;
   if (tab === "ask") {

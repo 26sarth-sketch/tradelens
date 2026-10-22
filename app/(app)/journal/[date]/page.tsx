@@ -5,7 +5,7 @@ import { DayNotes } from "@/components/journal/DayNotes";
 import { Card } from "@/components/ui/Card";
 import { Money } from "@/components/ui/Money";
 import { db } from "@/lib/db";
-import { fromIST, formatTimeIST } from "@/lib/format";
+import { formatTimeIST, fromIST, isDayKey } from "@/lib/format";
 import { computeStats } from "@/lib/stats";
 import { getCurrentUser } from "@/lib/user";
 
@@ -22,7 +22,7 @@ function shiftDay(date: string, delta: number) {
 // Plan and end-of-day reflection editing live in the Notebook (Day 2).
 export default async function JournalDayPage({ params }: { params: Promise<{ date: string }> }) {
   const [{ date }, user] = await Promise.all([params, getCurrentUser()]);
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) notFound();
+  if (!isDayKey(date)) notFound();
 
   const [trades, journal] = await Promise.all([
     db.trade.findMany({

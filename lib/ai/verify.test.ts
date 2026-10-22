@@ -40,6 +40,12 @@ describe("verifyNumbers", () => {
     assert.deepEqual(verifyNumbers("₹14,709", data).unverified, ["₹14,709"]);
   });
 
+  it("accepts how far a breach went over its own limit, but not across breaches", () => {
+    const breaches = { risk_rule_breaches: [{ rule: "PER_TRADE_LOSS", value: 5545, limit: 2000 }, { rule: "DAILY_LOSS", value: 4200, limit: 4000 }] };
+    assert.deepEqual(verifyNumbers("lost ₹3,545 more than the limit", breaches).unverified, []);
+    assert.deepEqual(verifyNumbers("₹1,545", breaches).unverified, ["₹1,545"]); // 5545 − 4000 mixes two breaches
+  });
+
   it("flags invented figures", () => {
     assert.deepEqual(verifyNumbers(["You could make ₹50,000 next month", "win rate 90%"], data).unverified, ["₹50,000", "90%"]);
   });

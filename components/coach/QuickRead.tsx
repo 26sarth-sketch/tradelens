@@ -8,6 +8,7 @@ import { applyFilter } from "@/lib/filters";
 import { loadReportTrades } from "@/lib/report-data";
 import { groupReport, reportInsights } from "@/lib/reports";
 import { computeStats } from "@/lib/stats";
+import { MoneyText } from "@/components/ui/MoneyText";
 
 /**
  * "What your data says" without AI: the biggest patterns, computed in code from
@@ -78,7 +79,7 @@ export async function QuickRead({ userId }: { userId: string }) {
                 <Icon size={17} className={clsx("mt-0.5 shrink-0", it.tone === "good" ? "text-profit" : it.tone === "bad" ? "text-loss" : "text-accent")} aria-hidden />
                 <span>
                   <span className="block text-sm font-medium">{it.title}</span>
-                  <span className="block text-xs text-muted">{it.detail}</span>
+                  <span className="block text-xs text-muted">{typeof it.detail === "string" ? <MoneyText text={it.detail} /> : it.detail}</span>
                 </span>
               </Link>
             </li>

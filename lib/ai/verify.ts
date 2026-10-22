@@ -71,14 +71,21 @@ function close(f: Figure, k: number): boolean {
 /**
  * Differences and sums between SIBLING values of the same metric only: the same key
  * across the items of one list (time buckets, groups) or the children of one object
- * (a comparison's two sides). That covers "₹2,879 more per trade than…" without
- * letting unrelated numbers combine into a coincidental match.
+ * (a comparison's two sides), plus a rule breach's value minus its own limit. That
+ * covers "₹2,879 more per trade than…" without letting unrelated numbers combine
+ * into a coincidental match.
  */
 function siblingDerived(data: unknown, out: number[] = []): number[] {
   if (Array.isArray(data)) {
     pairUp(data, out);
     data.forEach((d) => siblingDerived(d, out));
   } else if (data && typeof data === "object") {
+    // "₹3,545 over the limit": a measured value against its own limit in the same object.
+    const o = data as Record<string, unknown>;
+    for (const k of ["value", "current"]) {
+      const v = o[k];
+      if (typeof v === "number" && typeof o.limit === "number") out.push(v - o.limit);
+    }
     const children = Object.values(data);
     pairUp(children, out);
     children.forEach((c) => siblingDerived(c, out));

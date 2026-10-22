@@ -8,6 +8,7 @@ import type { ReportResult, ReportType, StoredReport } from "@/lib/ai/coach";
 import type { FirstImport, Session, TradeFeedback, Weekly } from "@/lib/ai/schemas";
 import { formatDateTimeIST } from "@/lib/format";
 import { VerificationBadge } from "./VerificationBadge";
+import { MoneyText } from "@/components/ui/MoneyText";
 
 type Insight = { title: string; detail: string; evidence: string };
 
@@ -19,9 +20,9 @@ function InsightList({ items, tone }: { items: Insight[]; tone: "good" | "bad" }
         <li key={n} className="flex gap-2.5">
           <Icon size={17} className={clsx("mt-0.5 shrink-0", tone === "good" ? "text-profit" : "text-loss")} aria-hidden />
           <div>
-            <div className="text-sm font-medium">{i.title}</div>
-            <p className="text-sm text-muted">{i.detail}</p>
-            <p className="tabular mt-0.5 rounded bg-surface-2 px-2 py-1 text-xs">{i.evidence}</p>
+            <div className="text-sm font-medium"><MoneyText text={i.title} /></div>
+            <p className="text-sm text-muted"><MoneyText text={i.detail} /></p>
+            <p className="tabular mt-0.5 rounded bg-surface-2 px-2 py-1 text-xs"><MoneyText text={i.evidence} /></p>
           </div>
         </li>
       ))}
@@ -41,7 +42,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 function FirstImportView({ r }: { r: FirstImport }) {
   return (
     <div className="space-y-5">
-      <p className="text-sm">{r.summary}</p>
+      <p className="text-sm"><MoneyText text={r.summary} /></p>
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
         <Section title="What's working"><InsightList items={r.strengths} tone="good" /></Section>
         <Section title="Where money leaks"><InsightList items={r.leaks} tone="bad" /></Section>
@@ -64,8 +65,8 @@ function WeeklyView({ r }: { r: Weekly }) {
             <li key={i} className="flex gap-3 rounded-lg border border-accent/30 bg-accent/5 p-3">
               <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent text-xs font-semibold text-accent-fg">{i + 1}</span>
               <div>
-                <div className="text-sm font-medium">{x.rule}</div>
-                <div className="text-xs text-muted">{x.why}</div>
+                <div className="text-sm font-medium"><MoneyText text={x.rule} /></div>
+                <div className="text-xs text-muted"><MoneyText text={x.why} /></div>
               </div>
             </li>
           ))}
@@ -92,7 +93,7 @@ function SessionView({ r }: { r: Session }) {
             {r.rule_breaks.map((b, i) => (
               <li key={i} className="flex gap-2 text-sm">
                 <XCircle size={17} className="mt-0.5 shrink-0 text-loss" aria-hidden />
-                <div><span className="font-medium">{b.rule}:</span> <span className="text-muted">{b.what_happened}</span></div>
+                <div><span className="font-medium"><MoneyText text={b.rule} />:</span> <span className="text-muted"><MoneyText text={b.what_happened} /></span></div>
               </li>
             ))}
           </ul>
@@ -100,15 +101,15 @@ function SessionView({ r }: { r: Session }) {
       )}
       <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
         <Section title="Went well">
-          <ul className="space-y-1.5">{r.went_well.map((x, i) => <li key={i} className="flex gap-2 text-sm"><CheckCircle2 size={16} className="mt-0.5 shrink-0 text-profit" aria-hidden />{x}</li>)}</ul>
+          <ul className="space-y-1.5">{r.went_well.map((x, i) => <li key={i} className="flex gap-2 text-sm"><CheckCircle2 size={16} className="mt-0.5 shrink-0 text-profit" aria-hidden /><MoneyText text={x} /></li>)}</ul>
         </Section>
         <Section title="To fix">
-          <ul className="space-y-1.5">{r.to_fix.map((x, i) => <li key={i} className="flex gap-2 text-sm"><AlertTriangle size={16} className="mt-0.5 shrink-0 text-warn" aria-hidden />{x}</li>)}</ul>
+          <ul className="space-y-1.5">{r.to_fix.map((x, i) => <li key={i} className="flex gap-2 text-sm"><AlertTriangle size={16} className="mt-0.5 shrink-0 text-warn" aria-hidden /><MoneyText text={x} /></li>)}</ul>
         </Section>
       </div>
       <div className="rounded-lg border border-accent/30 bg-accent/5 p-3 text-sm">
         <span className="text-xs uppercase tracking-wide text-muted">Tomorrow&apos;s focus</span>
-        <p className="font-medium">{r.tomorrow_focus}</p>
+        <p className="font-medium"><MoneyText text={r.tomorrow_focus} /></p>
       </div>
     </div>
   );
@@ -127,16 +128,16 @@ function TradeView({ r }: { r: TradeFeedback }) {
       <div className="grid gap-5 md:grid-cols-2">
         {r.went_well.length > 0 && (
           <Section title="Went well">
-            <ul className="space-y-1.5">{r.went_well.map((x, i) => <li key={i} className="flex gap-2 text-sm"><CheckCircle2 size={16} className="mt-0.5 shrink-0 text-profit" aria-hidden />{x}</li>)}</ul>
+            <ul className="space-y-1.5">{r.went_well.map((x, i) => <li key={i} className="flex gap-2 text-sm"><CheckCircle2 size={16} className="mt-0.5 shrink-0 text-profit" aria-hidden /><MoneyText text={x} /></li>)}</ul>
           </Section>
         )}
         <Section title="To improve">
-          <ul className="space-y-1.5">{r.to_improve.map((x, i) => <li key={i} className="flex gap-2 text-sm"><AlertTriangle size={16} className="mt-0.5 shrink-0 text-warn" aria-hidden />{x}</li>)}</ul>
+          <ul className="space-y-1.5">{r.to_improve.map((x, i) => <li key={i} className="flex gap-2 text-sm"><AlertTriangle size={16} className="mt-0.5 shrink-0 text-warn" aria-hidden /><MoneyText text={x} /></li>)}</ul>
         </Section>
       </div>
       <div className="rounded-lg border border-accent/30 bg-accent/5 p-3 text-sm">
         <span className="text-xs uppercase tracking-wide text-muted">Lesson</span>
-        <p className="font-medium">{r.lesson}</p>
+        <p className="font-medium"><MoneyText text={r.lesson} /></p>
       </div>
     </div>
   );
@@ -149,7 +150,7 @@ function NextSteps({ title, items }: { title: string; items: string[] }) {
         {items.map((s, i) => (
           <li key={i} className="flex gap-3 rounded-lg border border-accent/30 bg-accent/5 p-3 text-sm">
             <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent text-xs font-semibold text-accent-fg">{i + 1}</span>
-            {s}
+            <MoneyText text={s} />
           </li>
         ))}
       </ol>
@@ -244,7 +245,7 @@ export function ReportCard({
 
       {report && out && (
         <div className={clsx("space-y-4 transition-opacity", pending && "opacity-50")}>
-          <p className="text-lg font-medium leading-snug">{out.headline}</p>
+          <p className="text-lg font-medium leading-snug"><MoneyText text={out.headline} /></p>
           {type === "FIRST_IMPORT" && <FirstImportView r={out} />}
           {type === "WEEKLY" && <WeeklyView r={out} />}
           {type === "SESSION" && <SessionView r={out} />}

@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import { formatDateIST, formatTimeIST } from "@/lib/format";
 import { getCurrentUser } from "@/lib/user";
 import { decideAll, decideSuggestion, scanForTags } from "./actions";
+import { MoneyText } from "@/components/ui/MoneyText";
 
 export const metadata = { title: "Auto-tag review" };
 
@@ -80,7 +81,7 @@ export default async function TagReviewPage({ searchParams }: { searchParams: Pr
                       <span className="text-muted">{formatDateIST(s.trade.entryAt)} {formatTimeIST(s.trade.entryAt)}</span>{" "}
                       <span className="font-medium">{s.trade.symbol}</span>{" "}
                       <Money value={s.trade.netPnl} pnl />
-                      {s.reason && <span className="block text-xs text-muted">{s.reason}</span>}
+                      {s.reason && <span className="block text-xs text-muted"><MoneyText text={s.reason} /></span>}
                     </Link>
                     <div className="flex gap-1.5">
                       <form action={decideSuggestion}>

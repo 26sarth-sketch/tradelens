@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import type { BrokeragePlanKey } from "@/config/market";
 import { db } from "@/lib/db";
-import { fromIST } from "@/lib/format";
+import { fromIST, isDayKey } from "@/lib/format";
 import { buildTradeData, computeR } from "@/lib/trades";
 import { EMOTIONS, EXCHANGES, SEGMENTS } from "@/lib/types";
 import { deleteImage, saveImage } from "@/lib/uploads";
@@ -14,7 +14,7 @@ import { getCurrentUser } from "@/lib/user";
 
 const optNum = z.preprocess((v) => (v === "" || v == null ? undefined : v), z.coerce.number().optional());
 const time = z.string().regex(/^\d{2}:\d{2}$/, "Use HH:MM");
-const day = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Pick a date");
+const day = z.string().refine(isDayKey, "Pick a date");
 
 const ManualTrade = z
   .object({
@@ -150,7 +150,7 @@ export async function updateTradeReview(id: string, _prev: ReviewState, formData
   let screenshotName = trade.screenshot;
   if (screenshot instanceof File && screenshot.size > 0) {
     const saved = await saveImage(screenshot);
-    if ("error" in saved) return { error: saved.error, fieldErrors: { screenshot: saved.error } };
+    if ("error" in saved) return { error: "Please fix the highlighted fields.", fieldErrors: { screenshot: saved.error } };
     await deleteImage(trade.screenshot);
     screenshotName = saved.name;
   } else if (v.removeScreenshot === "1") {

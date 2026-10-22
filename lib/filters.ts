@@ -3,7 +3,7 @@
 // Date range narrows the DB query; everything else is applied in memory, which is
 // simple, testable, and fast for a single trader's few thousand trades.
 
-import { istDateKey, istMinutes } from "./format";
+import { isDayKey, istDateKey, istMinutes } from "./format";
 import { EMOTIONS, SEGMENTS, type Segment } from "./types";
 
 export type TradeFilter = {
@@ -40,7 +40,6 @@ export type FilterableTrade = {
   tags: { tag: { name: string }; accepted: boolean }[];
 };
 
-const DAY = /^\d{4}-\d{2}-\d{2}$/;
 const HHMM = /^\d{2}:\d{2}$/;
 const toMin = (hhmm: string) => Number(hhmm.slice(0, 2)) * 60 + Number(hhmm.slice(3, 5));
 
@@ -55,8 +54,8 @@ export function parseFilter(params: Params, prefix = ""): TradeFilter {
   const f: TradeFilter = {};
   const from = get("from");
   const to = get("to");
-  if (from && DAY.test(from)) f.from = from;
-  if (to && DAY.test(to)) f.to = to;
+  if (from && isDayKey(from)) f.from = from;
+  if (to && isDayKey(to)) f.to = to;
   const seg = get("segment");
   if (seg && (SEGMENTS as readonly string[]).includes(seg)) f.segment = seg as Segment;
   if (get("strategyId")) f.strategyId = get("strategyId");

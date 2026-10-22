@@ -4,15 +4,15 @@ import { revalidatePath } from "next/cache";
 import { askJournal, type ChatResult, generateFirstImport, generateSession, generateTradeFeedback, generateWeekly, type ReportResult, type ReportType } from "@/lib/ai/coach";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/user";
+import { isDayKey } from "@/lib/format";
 
-const DAY = /^\d{4}-\d{2}-\d{2}$/;
 
 /** Generates (or regenerates) one AI report and caches it. */
 export async function runReport(type: ReportType, key: string): Promise<ReportResult> {
   const user = await getCurrentUser();
   let res: ReportResult;
-  if (type === "WEEKLY" && DAY.test(key)) res = await generateWeekly(user.id, key);
-  else if (type === "SESSION" && DAY.test(key)) res = await generateSession(user.id, key);
+  if (type === "WEEKLY" && isDayKey(key)) res = await generateWeekly(user.id, key);
+  else if (type === "SESSION" && isDayKey(key)) res = await generateSession(user.id, key);
   else if (type === "FIRST_IMPORT") res = await generateFirstImport(user.id, key);
   else if (type === "TRADE") {
     res = await generateTradeFeedback(user.id, key);

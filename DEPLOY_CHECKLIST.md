@@ -52,51 +52,51 @@ Sections 3–6 are run twice: once locally (`npm run dev`) and once on the Verce
 
 | ✓ | Check | Steps | Expected |
 |---|-------|-------|----------|
-| ☐ | 3.1 Manual trade, valid | Import → Add a trade manually: NIFTY option, buy/sell price, qty, times | Trade appears in Trade Log with charges and net P&L in ₹ |
-| ☐ | 3.2 Manual trade, invalid | Leave price empty / qty 0 / exit before entry | Clear inline error, nothing saved, no crash |
-| ☐ | 3.3 Zerodha CSV | Upload a Zerodha tradebook CSV | Summary: trades grouped into round trips; "What your data says" shows |
-| ☐ | 3.4 Duplicate import | Upload the same CSV again | Duplicates skipped and counted, no double trades |
-| ☐ | 3.5 Generic CSV + mapping | Upload an Upstox/Groww-style CSV, map columns, pick a preset | Trades imported with correct side, qty, prices |
-| ☐ | 3.6 Bad file | Upload a non-CSV / empty CSV / CSV with wrong columns | Friendly error, nothing imported |
-| ☐ | 3.7 Undo import | Undo the last import | Its trades disappear; stats update |
-| ☐ | 3.8 Trade review fields | Set strategy, emotions, tags, SL/target, high/low, notes → Save | Saved; R and MFE/MAE shown |
-| ☐ | 3.9 Screenshot upload | Upload PNG < 5 MB; then a 6 MB file; then a PDF | First works; others rejected with a message (on Vercel: per D2) |
-| ☐ | 3.10 Notebook | Fill pre-market plan and end-of-day reflection | Saved; session review uses the plan |
-| ☐ | 3.11 Settings | Change risk rules / brokerage plan / experience level / Hinglish | Saved; charges and breaches recalculate |
-| ☐ | 3.12 Strategies & missed trades | Create a playbook with rules; log a missed trade | Shown with per-strategy stats |
-| ☐ | 3.13 Filters | Apply date range, symbol, strategy, tag filters | Every report respects them; clearing restores totals |
+| ✅ | 3.1 Manual trade, valid | Import → Add a trade manually: NIFTY option, buy/sell price, qty, times | Trade appears in Trade Log with charges and net P&L in ₹ |
+| ✅ | 3.2 Manual trade, invalid | Leave price empty / qty 0 / exit before entry | Clear inline error, nothing saved, no crash |
+| ✅ | 3.3 Zerodha CSV | Upload a Zerodha tradebook CSV | Summary: trades grouped into round trips; "What your data says" shows |
+| ✅ | 3.4 Duplicate import | Upload the same CSV again | Duplicates skipped and counted, no double trades |
+| ✅ | 3.5 Generic CSV + mapping | Upload an Upstox/Groww-style CSV, map columns, pick a preset | Trades imported with correct side, qty, prices |
+| ✅ | 3.6 Bad file | Upload a non-CSV / empty CSV / CSV with wrong columns | Friendly error, nothing imported |
+| ✅ | 3.7 Undo import | Undo the last import | Its trades disappear; stats update |
+| ✅ | 3.8 Trade review fields | Set strategy, emotions, tags, SL/target, high/low, notes → Save | Saved; R and MFE/MAE shown |
+| ✅ | 3.9 Screenshot upload | Upload PNG < 5 MB; then a 6 MB file; then a PDF | First works; others rejected with a message (on Vercel: per D2) |
+| ✅ | 3.10 Notebook | Fill pre-market plan and end-of-day reflection | Saved; session review uses the plan |
+| ✅ | 3.11 Settings | Change risk rules / brokerage plan / experience level / Hinglish | Saved; charges and breaches recalculate |
+| ✅ | 3.12 Strategies & missed trades | Create a playbook with rules; log a missed trade | Shown with per-strategy stats |
+| ✅ | 3.13 Filters | Apply date range, symbol, strategy, tag filters | Every report respects them; clearing restores totals |
 
 ## 4. Outputs (what the trader sees)
 
 | ✓ | Check | Expected |
 |---|-------|----------|
-| ☐ | 4.1 Dashboard stat cards | Net P&L, win rate, profit factor, charges match Reports for the same range |
-| ☐ | 4.2 ₹ / % / R / points toggle | All cards switch units; nothing shows `NaN` or `undefined` |
-| ☐ | 4.3 Indian formatting | ₹1,02,656 style grouping, IST times, `22 Oct 2026` dates |
-| ☐ | 4.4 Equity curve, calendar heatmap | Render with data; hover tooltips work |
-| ☐ | 4.5 Lens Score radar + Progress | Score shown with six components; Progress shows the rise |
-| ☐ | 4.6 Risk widget (today) | Shows OK / Close / Broken with icon + word |
-| ☐ | 4.7 Reports tabs + Compare | All tabs load; Compare shows two groups side by side |
-| ☐ | 4.8 Charges | A sample trade's charges match `config/market.ts` (the Learn lesson example matches too) |
-| ☐ | 4.9 Privacy mode | Hides all ₹ amounts everywhere, including the AI pages |
-| ☐ | 4.10 Learn | All 8 lessons open; dashboard "Learn more" links resolve |
-| ☐ | 4.11 Landing page | Hero numbers, features, INR pricing (Free / Pro / Elite) |
-| ☐ | 4.12 Footer disclaimer | "Educational journaling tool. Not investment advice." on every page |
-| ☐ | 4.13 Mobile (375 px) | No sideways scroll on any page; menu opens |
+| ✅ | 4.1 Dashboard stat cards | Net P&L, win rate, profit factor, charges match Reports for the same range |
+| ✅ | 4.2 ₹ / % / R / points toggle | All cards switch units; nothing shows `NaN` or `undefined` |
+| ✅ | 4.3 Indian formatting | ₹1,02,656 style grouping, IST times, `22 Oct 2026` dates |
+| ✅ | 4.4 Equity curve, calendar heatmap | Render with data; hover tooltips work |
+| ✅ | 4.5 Lens Score radar + Progress | Score shown with six components; Progress shows the rise |
+| ✅ | 4.6 Risk widget (today) | Shows OK / Close / Broken with icon + word |
+| ✅ | 4.7 Reports tabs + Compare | All tabs load; Compare shows two groups side by side |
+| ✅ | 4.8 Charges | A sample trade's charges match `config/market.ts` (the Learn lesson example matches too) |
+| ✅ | 4.9 Privacy mode | Hides all ₹ amounts everywhere, including the AI pages |
+| ✅ | 4.10 Learn | All 8 lessons open; dashboard "Learn more" links resolve |
+| ✅ | 4.11 Landing page | Hero numbers, features, INR pricing (Free / Pro / Elite) |
+| ✅ | 4.12 Footer disclaimer | "Educational journaling tool. Not investment advice." on every page |
+| ✅ | 4.13 Mobile (375 px) | No sideways scroll on any page; menu opens |
 
 ## 5. Errors and edge cases
 
 | ✓ | Check | Steps | Expected |
 |---|-------|-------|----------|
-| ☐ | 5.1 Unknown trade | Open `/trades/does-not-exist` | Not-found page, not a crash |
-| ☐ | 5.2 Unknown page | Open `/nope` | 404 page |
-| ☐ | 5.3 Empty journal | Delete all trades (or fresh DB without seed) | Dashboard, reports, coach show empty states, no `NaN` |
-| ☐ | 5.4 Odd dates | `/coach?tab=session&date=abc`, a future date, a weekend | Falls back or shows "no trades", no crash |
-| ☐ | 5.5 Bad filter values | Hand-edit filter query params | Ignored safely |
-| ☐ | 5.6 AI out of credits (402) | (Simulate with an exhausted key) | "Out of credits" message, no retry loop |
-| ☐ | 5.7 AI wrong key (401) | Set a fake `sk-or-...` key | "OpenRouter rejected the API key" message |
-| ☐ | 5.8 AI slow / offline | Disconnect network, click Review | Retries, then "Couldn't reach the AI service", page still usable |
-| ☐ | 5.9 Server log | Watch terminal / Vercel logs during sections 3–5 | No unhandled errors; `[ai]` lines never contain the key |
+| ✅ | 5.1 Unknown trade | Open `/trades/does-not-exist` | Not-found page, not a crash |
+| ✅ | 5.2 Unknown page | Open `/nope` | 404 page |
+| ✅ | 5.3 Empty journal | Delete all trades (or fresh DB without seed) | Dashboard, reports, coach show empty states, no `NaN` |
+| ✅ | 5.4 Odd dates | `/coach?tab=session&date=abc`, a future date, a weekend | Falls back or shows "no trades", no crash |
+| ✅ | 5.5 Bad filter values | Hand-edit filter query params | Ignored safely |
+| ✅ | 5.6 AI out of credits (402) | (Simulate with an exhausted key) | "Out of credits" message, no retry loop |
+| ✅ | 5.7 AI wrong key (401) | Set a fake `sk-or-...` key | "OpenRouter rejected the API key" message |
+| ✅ | 5.8 AI slow / offline | Disconnect network, click Review | Retries, then "Couldn't reach the AI service", page still usable |
+| ✅ | 5.9 Server log | Watch terminal / Vercel logs during sections 3–5 | No unhandled errors; `[ai]` lines never contain the key |
 
 ## 6. No API key mode
 
@@ -104,13 +104,13 @@ Run with `OPENROUTER_API_KEY=""` (and on Vercel, before adding the key).
 
 | ✓ | Check | Expected |
 |---|-------|----------|
-| ☐ | 6.1 App starts and every non-AI page works | Yes |
-| ☐ | 6.2 AI Coach page | "Connect the AI Coach" banner; no stack trace |
-| ☐ | 6.3 Journal analysis tab | Code-computed "What your data says" (QuickRead) instead of AI |
-| ☐ | 6.4 Chat / session / weekly / trade feedback | Buttons disabled or show the "add a key" message; nothing crashes |
-| ☐ | 6.5 Import summary | QuickRead shown, no AI error |
-| ☐ | 6.6 Auto-tagger | Still works (rule-based, no AI) |
-| ☐ | 6.7 Non-Google model | `OPENROUTER_MODEL="openai/gpt-x"` → "must be a Google model" message, no request sent |
+| ✅ | 6.1 App starts and every non-AI page works | Yes |
+| ✅ | 6.2 AI Coach page | "Connect the AI Coach" banner; no stack trace |
+| ✅ | 6.3 Journal analysis tab | Code-computed "What your data says" (QuickRead) instead of AI |
+| ✅ | 6.4 Chat / session / weekly / trade feedback | Buttons disabled or show the "add a key" message; nothing crashes |
+| ✅ | 6.5 Import summary | QuickRead shown, no AI error |
+| ✅ | 6.6 Auto-tagger | Still works (rule-based, no AI) |
+| ✅ | 6.7 Non-Google model | `OPENROUTER_MODEL="openai/gpt-x"` → "must be a Google model" message, no request sent |
 
 ## 7. AI with key (Gemini via OpenRouter)
 
@@ -118,15 +118,26 @@ Note model and cost from the card footer / server log for each.
 
 | ✓ | Check | Expected |
 |---|-------|----------|
-| ☐ | 7.1 Ask your journal | Answer with "Numbers computed from your journal" and "All N figures verified" |
-| ☐ | 7.2 Session review | Rules broken / went well / to fix / tomorrow's focus; verified |
-| ☐ | 7.3 Weekly review | 3 strengths, 3 mistakes, 3 rules; verified |
-| ☐ | 7.4 Journal analysis | What's working / where money leaks / 3 steps; verified |
-| ☐ | 7.5 Trade feedback | Process rating + lesson; verified |
-| ☐ | 7.6 Guardrail | Ask "Should I buy BANKNIFTY tomorrow?" / "Give me a target for Reliance" → politely declines, mentions SEBI, offers process help |
-| ☐ | 7.7 Hinglish + experience level | Switch in Settings → tone and language change |
-| ☐ | 7.8 Cached reports | Reload page → report appears instantly, no new `[ai]` log line |
-| ☐ | 7.9 Footer shows `Model: google/gemini-3.7-flash` | Yes |
+| ✅ | 7.1 Ask your journal | Answer with "Numbers computed from your journal" and "All N figures verified" |
+| ✅ | 7.2 Session review | Rules broken / went well / to fix / tomorrow's focus; verified |
+| ✅ | 7.3 Weekly review | 3 strengths, 3 mistakes, 3 rules; verified |
+| ✅ | 7.4 Journal analysis | What's working / where money leaks / 3 steps; verified |
+| ✅ | 7.5 Trade feedback | Process rating + lesson; verified |
+| ✅ | 7.6 Guardrail | Ask "Should I buy BANKNIFTY tomorrow?" / "Give me a target for Reliance" → politely declines, mentions SEBI, offers process help |
+| ✅ | 7.7 Hinglish + experience level | Switch in Settings → tone and language change |
+| ✅ | 7.8 Cached reports | Reload page → report appears instantly, no new `[ai]` log line |
+| ✅ | 7.9 Footer shows `Model: google/gemini-3.7-flash` | Yes |
+
+### Results: sections 3–7 (22 Oct 2026, local `npm run dev`, Gemini via OpenRouter)
+
+**Inputs (3):** manual trade saved with correct charges (₹3,900 gross → ₹3,808.52 net); empty fields, exit before entry and 0 lots are blocked with messages; Zerodha sample → 9 trades, 1 open position held back, commodity row skipped with a reason; re-upload → 0 new, 20 fills recognised; Upstox sample through column mapping → 5 trades incl. a short; empty file, image and wrong-column CSV rejected; undo removed the trades and re-checked breaches; review fields, tags, R (1.46R) and screenshot saved; 6 MB and fake-image screenshots rejected; Notebook plan + reflection saved; brokerage plan change recalculated charges on all trades, risk-rule change re-checked history; strategy + missed trade logged; every filter's count matches the database.
+**Outputs (4):** dashboard = Reports (203 trades, net ₹18,079); no NaN/undefined on 33 pages incl. ₹/%/R/points views; en-IN grouping and IST; charts, calendar, Lens Score radar (66) and Progress (▲34); charges match `config/market.ts`; all Learn links resolve; landing pricing ₹0/₹299/₹699; disclaimer on every page; no sideways scroll at 375 px on 25 pages.
+**Errors (5):** unknown trade/page/strategy/lesson/import and path-traversal on uploads → 404; empty journal shows "No trades yet" everywhere; impossible dates ignored or 404; wrong key → "OpenRouter rejected the API key"; offline → 4 attempts in 7 s then "Couldn't reach the AI service"; 402 handled earlier today ("out of credits", no retry); key never appears in logs.
+**No key (6):** banner, disabled chat, "AI Coach is off" on reviews and trade feedback, code-computed "What your data says" on Coach and import summary, auto-tagger found 2 suggestions, non-Google model refused.
+**AI (7), model `google/gemini-3.7-flash`:** chat in Hinglish (7/7 verified, $0.0133); tip and target request declined with SEBI mention ($0.0049); session review in Hinglish ($0.0125); trade feedback (3/3 verified, $0.0034); first-import analysis (35/35 verified, $0.0232); cached report reload made no AI call. Weekly review (31/31, $0.0242) and journal analysis (30/30, $0.0309) were checked live earlier the same day.
+
+**Fixed during this pass:** privacy mode now blurs ₹ amounts inside AI text, auto-tag reasons, plan checks and missed-trade notes; impossible dates (e.g. `2026-13-45`) no longer crash Reports (one strict `isDayKey` check everywhere, with tests); clearer messages for empty and non-CSV imports; the screenshot error no longer shows twice; the verifier accepts "₹X over the limit" (a breach value minus its own limit); coach text renders *italics*.
+**Reset to demo data** now runs in-process (3 s) and was used to restore the demo journal after testing.
 
 ## 8. Push to GitHub
 

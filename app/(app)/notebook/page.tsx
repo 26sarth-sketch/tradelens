@@ -8,10 +8,11 @@ import { Card } from "@/components/ui/Card";
 import { Money } from "@/components/ui/Money";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { db } from "@/lib/db";
-import { formatDateIST, fromIST, istDateKey } from "@/lib/format";
+import { formatDateIST, fromIST, isDayKey, istDateKey } from "@/lib/format";
 import { comparePlan } from "@/lib/plan";
 import { parseIdList } from "@/lib/strategies";
 import { getCurrentUser } from "@/lib/user";
+import { MoneyText } from "@/components/ui/MoneyText";
 
 export const metadata = { title: "Notebook" };
 
@@ -25,7 +26,7 @@ function shiftDay(date: string, delta: number) {
 export default async function NotebookPage({ searchParams }: { searchParams: Promise<{ date?: string }> }) {
   const [sp, user] = await Promise.all([searchParams, getCurrentUser()]);
   const today = istDateKey(new Date());
-  const date = sp.date && /^\d{4}-\d{2}-\d{2}$/.test(sp.date) ? sp.date : today;
+  const date = sp.date && isDayKey(sp.date) ? sp.date : today;
 
   const [entry, strategies, trades, recent] = await Promise.all([
     db.dailyJournal.findUnique({ where: { userId_date: { userId: user.id, date } } }),
@@ -97,7 +98,7 @@ export default async function NotebookPage({ searchParams }: { searchParams: Pro
                       {c.ok ? <CheckCircle2 size={18} className="mt-0.5 shrink-0 text-profit" /> : <XCircle size={18} className="mt-0.5 shrink-0 text-loss" />}
                       <div>
                         <div className="font-medium">{c.label} <span className={clsx("text-xs font-normal", c.ok ? "text-profit" : "text-loss")}>{c.ok ? "kept" : "broken"}</span></div>
-                        <div className="text-xs text-muted">{c.detail}</div>
+                        <div className="text-xs text-muted"><MoneyText text={c.detail} /></div>
                       </div>
                     </li>
                   ))}

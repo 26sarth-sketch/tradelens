@@ -25,9 +25,14 @@ type Parsed = { parsed: ParseResult; source: ImportSource; filename: string; col
  */
 async function parseUpload(formData: FormData): Promise<Parsed | { error: string }> {
   const file = formData.get("file");
-  if (!(file instanceof File) || file.size === 0) return { error: "Choose a CSV file first." };
+  if (!(file instanceof File)) return { error: "Choose a CSV file first." };
+  if (file.size === 0) return { error: "This file is empty. Download the tradebook again and upload it." };
   if (file.size > MAX_BYTES) return { error: "File is larger than 10 MB. Split it by date range." };
   const text = await file.text();
+  // Binary files (Excel, PDF, images) decode to control characters or U+FFFD.
+  if (/[\u0000-\u0008\u000E-\u001F\uFFFD]/.test(text.slice(0, 2000))) {
+    return { error: "This isn't a CSV file. Export the tradebook as CSV (not Excel or PDF) and upload that." };
+  }
 
   try {
     if (formData.get("kind") === "generic") {
