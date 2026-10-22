@@ -3,7 +3,7 @@ import "server-only";
 // in dev, private Vercel Blob when deployed) and served by app/api/uploads/[file]/route.ts.
 
 import { randomUUID } from "node:crypto";
-import { deleteFile, getFile, putFile } from "./storage";
+import { deleteFile, getFile, putFile, uploadsEnabled } from "./storage";
 
 export const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 /** Only names we generate are ever read back: uuid + known image extension. */
@@ -27,6 +27,7 @@ function sniff(b: Buffer): string | null {
 }
 
 export async function saveImage(file: File): Promise<{ name: string } | { error: string }> {
+  if (!uploadsEnabled()) return { error: "Screenshot upload is turned off on this hosted demo." };
   if (file.size > MAX_IMAGE_BYTES) return { error: "Screenshot must be 5 MB or smaller." };
   const buf = Buffer.from(await file.arrayBuffer());
   const ext = sniff(buf);

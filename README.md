@@ -117,7 +117,7 @@ Local dev uses the SQLite file and `uploads/`. Vercel's filesystem is read-only,
    ```
    Then run `npm run db:turso` once: it creates the tables and loads the demo journal.
 2. **Vercel:** import the GitHub repo (framework: Next.js). In Settings → Environment Variables add `TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN`, `OPENROUTER_API_KEY` (use a separate key with a credit limit) and `OPENROUTER_MODEL=google/gemini-3.7-flash`.
-3. **Blob:** in the Vercel project → Storage → Create → Blob, choose **Private** access and connect it to the project. This adds `BLOB_READ_WRITE_TOKEN`.
+3. **Blob (optional):** screenshots are switched off on Vercel unless you add a store. To enable them: Vercel project → Storage → Create → Blob, choose **Private** access and connect it to the project. This adds `BLOB_READ_WRITE_TOKEN`.
 4. Redeploy. The build skips the local SQLite setup on Vercel. AI pages allow up to 300 s per request.
 
 Schema changes later: Prisma Migrate can't reach Turso; generate SQL with `npx prisma migrate diff --from-url file:./prisma/dev.db --to-schema-datamodel prisma/schema.prisma --script` and run it in the Turso dashboard's SQL shell.

@@ -15,6 +15,8 @@ export const UPLOAD_DIR = path.resolve(/* turbopackIgnore: true */ process.env.U
 const BLOB_PREFIX = "screenshots/";
 
 export const usingBlob = () => Boolean(process.env.BLOB_READ_WRITE_TOKEN?.trim());
+/** On Vercel without a Blob store the disk is read-only, so uploads are switched off. */
+export const uploadsEnabled = () => usingBlob() || !process.env.VERCEL;
 
 const localPath = (name: string) => path.join(/* turbopackIgnore: true */ UPLOAD_DIR, name);
 
@@ -23,6 +25,7 @@ export async function putFile(name: string, data: Buffer, contentType: string) {
     await put(BLOB_PREFIX + name, data, { access: "private", contentType, addRandomSuffix: false });
     return;
   }
+  if (!uploadsEnabled()) throw new Error("uploads disabled");
   await mkdir(/* turbopackIgnore: true */ UPLOAD_DIR, { recursive: true });
   await writeFile(/* turbopackIgnore: true */ localPath(name), data);
 }
