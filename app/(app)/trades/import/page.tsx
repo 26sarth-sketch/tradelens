@@ -1,6 +1,8 @@
 import { CheckCircle2 } from "lucide-react";
 import Link from "next/link";
-import { ZerodhaImport } from "@/components/trades/ZerodhaImport";
+import clsx from "clsx";
+import { GenericImport } from "@/components/trades/import/GenericImport";
+import { ZerodhaImport } from "@/components/trades/import/ZerodhaImport";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { db } from "@/lib/db";
 import { formatDateTimeIST } from "@/lib/format";
@@ -8,8 +10,9 @@ import { getCurrentUser } from "@/lib/user";
 
 export const metadata = { title: "Import trades" };
 
-export default async function ImportPage({ searchParams }: { searchParams: Promise<{ undone?: string }> }) {
+export default async function ImportPage({ searchParams }: { searchParams: Promise<{ undone?: string; broker?: string }> }) {
   const [sp, user] = await Promise.all([searchParams, getCurrentUser()]);
+  const generic = sp.broker === "other";
   const batches = await db.importBatch.findMany({
     where: { userId: user.id },
     orderBy: { createdAt: "desc" },
@@ -30,14 +33,22 @@ export default async function ImportPage({ searchParams }: { searchParams: Promi
         </div>
       )}
 
-      <div className="mb-4 flex gap-1 rounded-lg border border-border bg-surface p-1 text-sm sm:w-fit">
-        <span className="rounded-md bg-accent px-3 py-1.5 text-accent-fg">Zerodha</span>
-        <span className="cursor-not-allowed rounded-md px-3 py-1.5 text-muted" title="Coming in Day 1, step 6">
-          Upstox, Angel One, Groww, Dhan… (soon)
-        </span>
-      </div>
+      <nav className="mb-4 flex gap-1 rounded-lg border border-border bg-surface p-1 text-sm sm:w-fit">
+        {[
+          { href: "/trades/import", label: "Zerodha", active: !generic },
+          { href: "/trades/import?broker=other", label: "Upstox, Angel One, Groww, Dhan & others", active: generic },
+        ].map((t) => (
+          <Link
+            key={t.href}
+            href={t.href}
+            className={clsx("rounded-md px-3 py-1.5", t.active ? "bg-accent text-accent-fg" : "text-muted hover:text-fg")}
+          >
+            {t.label}
+          </Link>
+        ))}
+      </nav>
 
-      <ZerodhaImport />
+      {generic ? <GenericImport /> : <ZerodhaImport />}
 
       {batches.length > 0 && (
         <section className="mt-8">

@@ -38,3 +38,9 @@ Choices made where the brief was ambiguous, newest at the bottom. Each one is ea
 | 32 | **Expiry: `expiry_date` column wins; otherwise parsed from the symbol** (weekly `YYMDD` codes, monthly = last expiry weekday). MCX/CDS rows are skipped with a message. | Covers both Console export variants. |
 | 33 | **Import can be undone** (deletes the batch's trades). Server actions accept files up to 10 MB. | Safe to demo repeatedly. |
 | 34 | **Sample tradebook lives in `public/samples/`** with a "Try the sample file" button. | One-click import in the demo. |
+| 35 | **Generic importer = column mapping + broker presets** (Upstox, Angel One, Groww, Dhan, Other). Presets are header-name guesses that pre-fill the mapping; the broker is auto-detected from headers. | No per-broker parsers to maintain. ⚠️ Preset column names are unverified best guesses; check each against a real export. |
+| 36 | **Instrument detection order:** exchange-style symbol → separate strike/type/expiry columns → spaced symbol ("NIFTY 25300 CE 20 OCT 26") → equity (strip "-EQ"). | Brokers format F&O names very differently. |
+| 37 | **Dates are read day-first** (DD-MM-YYYY), with 12h/24h times; time can be in the date cell or its own column, else 09:15. | Indian brokers write dates day-first. |
+| 38 | **Without a trade id, dedupe uses a hash of (time, instrument, side, qty, price) + occurrence number.** | Groww-style exports have no trade id; re-importing the same file still dedupes. |
+| 39 | **Optional "status" column skips rejected/cancelled/open orders; "quantity is in lots" option multiplies F&O qty by lot size.** | Groww order history includes failed orders; some brokers show F&O qty in lots. |
+| 40 | **`BrokerAdapter` is an interface only** (no implementation), producing the same `Fill[]` as the CSV parsers. | API auto-sync is out of scope; the note shows exactly where it plugs in. |

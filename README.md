@@ -44,6 +44,14 @@ lib/              db, formatting (₹ en-IN, IST), stats, charges, import, AI
 prisma/           schema + seed
 ```
 
+## Importing trades
+
+- **Zerodha:** Console → Reports → Tradebook → CSV. Upload on *Add trades → Import*.
+- **Upstox, Angel One, Groww, Dhan, others:** upload any tradebook CSV, pick your broker to pre-fill the column mapping, check it, preview, import.
+- Sample files for the demo live in `public/samples/`.
+- Every import groups fills into round-trip trades, computes Indian charges, skips fills already imported, and can be undone.
+- Broker API auto-sync (Kite Connect, Upstox, Dhan) is roadmap: see the `BrokerAdapter` interface in `lib/import/adapters/BrokerAdapter.ts`.
+
 ## Demo script
 
 _Added on Day 2._
