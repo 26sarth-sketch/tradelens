@@ -50,7 +50,9 @@ ANTHROPIC_MODEL="claude-opus-5-5"
 | **Strategies** | Playbooks as entry/exit/risk checklists; per-strategy stats, R distribution and rule adherence; missed-trades log. |
 | **Risk rules** | Max daily loss, max trades per day, max loss per trade, stop after N losses in a row, no trades after a cut-off. Live status for today + breach history. |
 | **Notebook** | Pre-market plan, automatic plan-vs-actual checks, end-of-day reflection with a discipline rating. |
-| **AI Coach** | Ask-your-journal chat (numbers computed in code via a tool), session review, weekly review, first-import analysis. Every figure the AI writes is checked against your data. Beginner/Intermediate/Expert style; English or Hinglish. |
+| **AI Coach** | Ask-your-journal chat (numbers computed in code via a tool), session review, weekly review, first-import analysis, and coach feedback on every trade (process, not outcome). Every figure the AI writes is checked against your data. Beginner/Intermediate/Expert style; English or Hinglish (Settings). |
+| **Auto-tagger** | Scans trades for revenge trades, overtrading, losers held too long and entries after your cut-off, each with the reason. Accept or dismiss on *Trade Log → Auto-tag*; new imports are scanned automatically. Works without an AI key. |
+| **Learn** | 8 two-to-three-minute lessons (R-multiple, profit factor, charges in F&O, position sizing, revenge trading, expiry days, the Lens Score, using the journal), linked from the dashboard tooltips. |
 | **Lens Score & Progress** | A 0–100 score from six components (formula in `lib/score.ts`), rolling trend, disciplined-day streaks, discipline calendar, weekly table. |
 | **Landing page** | Hero with live numbers from the demo journal, features, AI coach, INR pricing (Free / Pro ₹299 / Elite ₹699, display only), FAQ. |
 
@@ -78,7 +80,7 @@ ANTHROPIC_MODEL="claude-opus-5-5"
 | **1:45** | **Progress** `/progress` | Lens Score climbing from the 30s to the 80s as the trader kept journaling; the discipline calendar turning green. "Fix one habit a week." |
 | **1:55** | Landing → **Pricing** | Free / Pro ₹299 / Elite ₹699. "Freemium, priced for India. Broker auto-sync is next." |
 
-**No AI key?** Skip 1:15–1:35 and show **Strategies** instead (every playbook profitable, "No strategy" deep red) and the **Notebook** plan-vs-actual checks.
+**No AI key?** Skip 1:15–1:35 and show **Trade Log → Auto-tag → Scan my trades** (revenge trades found with reasons, no AI needed), then **Strategies** (every playbook profitable, "No strategy" deep red).
 
 ### Demo-day checklist
 
