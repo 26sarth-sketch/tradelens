@@ -27,14 +27,14 @@ Everything except the AI Coach works without a key. To enable it:
 npm run set-key
 ```
 
-Paste your Anthropic API key at the hidden prompt, then restart `npm run dev`. Or edit `.env` directly:
+Paste your OpenRouter API key (`sk-or-...`) at the hidden prompt, then restart `npm run dev`. Or edit `.env` directly:
 
 ```
-ANTHROPIC_API_KEY="sk-ant-..."
-ANTHROPIC_MODEL="claude-opus-5-5"
+OPENROUTER_API_KEY="sk-or-..."
+OPENROUTER_MODEL="google/gemini-3.7-flash"
 ```
 
-`.env` is git-ignored. The model is read from `ANTHROPIC_MODEL`; nothing is hardcoded.
+The AI Coach uses Google Gemini models through OpenRouter only: the model must start with `google/`, and every request is pinned to Google's own infrastructure (Vertex / AI Studio) with no fallbacks. `.env` is git-ignored; nothing is hardcoded. Check the connection with `npm run ai:check` (one short call; prints the reply, model and cost).
 
 ---
 
@@ -97,7 +97,8 @@ ANTHROPIC_MODEL="claude-opus-5-5"
 | Script | What it does |
 |---|---|
 | `npm run dev` | Start the app (creates `.env`, syncs the DB, seeds an empty DB) |
-| `npm run set-key` | Save your Anthropic API key to `.env` from a hidden prompt |
+| `npm run set-key` | Save your OpenRouter API key to `.env` from a hidden prompt |
+| `npm run ai:check` | One short test call to the AI model; prints the reply, model and cost |
 | `npm run db:seed` | Wipe and reload the demo data |
 | `npx tsx scripts/check-seed.ts` | Print the demo patterns (plan vs no plan, expiry, after 2 PM, revenge) |
 | `npm test` | Unit tests (charges, import, stats, reports, rules, score, AI verifier, …) |
@@ -106,7 +107,7 @@ ANTHROPIC_MODEL="claude-opus-5-5"
 
 ## Tech stack
 
-Next.js 16 (App Router) · TypeScript · Tailwind CSS v4 (dark by default) · SQLite + Prisma 6 · Recharts · Anthropic SDK (Claude: structured outputs, tool use, refusal fallbacks) · Zod.
+Next.js 16 (App Router) · TypeScript · Tailwind CSS v4 (dark by default) · SQLite + Prisma 6 · Recharts · Google Gemini via OpenRouter (structured outputs, tool calling, Google-only routing) · Zod.
 
 ## Project layout
 
@@ -124,7 +125,7 @@ lib/stats.ts         Stats in ₹ / % / R / points
 lib/reports.ts       Report groupings · lib/compare.ts · lib/filters.ts
 lib/rules.ts         Risk-rule engine · lib/plan.ts (plan vs actual)
 lib/score.ts         Lens Score formula · lib/progress.ts
-lib/ai/              Claude client, guardrail, prompts, schemas, context, number verifier
+lib/ai/              OpenRouter/Gemini client, guardrail, prompts, schemas, context, number verifier
 prisma/              Schema, seed and demo-data generator
 DECISIONS.md         Every judgement call made while building, with reasons
 ```

@@ -235,7 +235,7 @@ export function ReportCard({
           {aiEnabled ? (
             <button type="button" onClick={generate} className="btn-primary"><Sparkles size={16} /> {LABELS[type].cta}</button>
           ) : (
-            <p className="text-sm text-muted">AI Coach is off. Add <code className="rounded bg-surface-2 px-1">ANTHROPIC_API_KEY</code> to <code className="rounded bg-surface-2 px-1">.env</code> and restart the app.</p>
+            <p className="text-sm text-muted">AI Coach is off. Add <code className="rounded bg-surface-2 px-1">OPENROUTER_API_KEY</code> to <code className="rounded bg-surface-2 px-1">.env</code> and restart the app.</p>
           )}
         </div>
       )}
@@ -251,7 +251,7 @@ export function ReportCard({
           {type === "TRADE" && <TradeView r={out} />}
           <div className="flex flex-wrap items-center gap-2 border-t border-border pt-3 text-xs text-muted">
             <VerificationBadge v={report.verification} />
-            <span>{report.scope} · generated {formatDateTimeIST(report.generatedAt)} · {report.model}</span>
+            <span>{report.scope} · generated {formatDateTimeIST(report.generatedAt)} · {report.model}{report.cost != null && ` · $${report.cost.toFixed(4)}`}</span>
           </div>
         </div>
       )}

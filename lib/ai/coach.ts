@@ -2,13 +2,12 @@ import "server-only";
 // AI Coach features: build context → call the model → verify numbers → cache.
 // Every call carries the compliance guardrail (prompts.ts) and the trader profile.
 
-import type Anthropic from "@anthropic-ai/sdk";
 import { db } from "../db";
 import { istDateKey } from "../format";
 import { loadReportTrades } from "../report-data";
-import { aiConfig, callStructured, fallbackParams, getClient, mapError, notConfigured, type AiFailure } from "./client";
+import { callStructured, chatCompletion, type AiFailure, type ChatMessage, notConfigured } from "./client";
 import { journalContext, sessionContext, tradeContext, weeklyContext } from "./context";
-import { executeQuery, QUERY_TOOL, type QueryInput } from "./journal-query";
+import { executeQuery, QUERY_TOOL, QUERY_TOOL_SPEC, type QueryInput } from "./journal-query";
 import { systemPrompt } from "./prompts";
 import { FirstImportSchema, SessionSchema, TradeFeedbackSchema, WeeklySchema } from "./schemas";
 import { verifyNumbers, type Verification } from "./verify";
@@ -20,6 +19,8 @@ export type StoredReport<T = unknown> = {
   verification: Verification;
   generatedAt: string;
   model: string;
+  /** USD cost of the call from OpenRouter's usage field, when reported. */
+  cost?: number | null;
   scope: string;
 };
 
@@ -50,11 +51,12 @@ export async function generateFirstImport(userId: string, key: string): Promise<
   const res = await callStructured({
     system: systemPrompt("first_import", prof.level, prof.language),
     user: userMessage("Analyse my trading journal.", data),
+    name: "first_import_analysis",
     schema: FirstImportSchema,
     effort: "medium",
   });
   if (!res.ok) return res;
-  const report = { output: res.data, verification: verifyNumbers(res.data, data), generatedAt: new Date().toISOString(), model: res.model, scope: `${data.period.from} → ${data.period.to}` };
+  const report = { output: res.data, verification: verifyNumbers(res.data, data), generatedAt: new Date().toISOString(), model: res.model, cost: res.cost, scope: `${data.period.from} → ${data.period.to}` };
   await store(userId, "FIRST_IMPORT", key, report);
   return { ok: true, report };
 }
@@ -67,11 +69,12 @@ export async function generateWeekly(userId: string, monday: string): Promise<Re
   const res = await callStructured({
     system: systemPrompt("weekly", prof.level, prof.language),
     user: userMessage(`Review my trading week starting ${monday}.`, data),
+    name: "weekly_review",
     schema: WeeklySchema,
     effort: "medium",
   });
   if (!res.ok) return res;
-  const report = { output: res.data, verification: verifyNumbers(res.data, data), generatedAt: new Date().toISOString(), model: res.model, scope: `${data.this_week.from} → ${data.this_week.to}` };
+  const report = { output: res.data, verification: verifyNumbers(res.data, data), generatedAt: new Date().toISOString(), model: res.model, cost: res.cost, scope: `${data.this_week.from} → ${data.this_week.to}` };
   await store(userId, "WEEKLY", monday, report);
   return { ok: true, report };
 }
@@ -83,11 +86,12 @@ export async function generateSession(userId: string, date: string): Promise<Rep
   const res = await callStructured({
     system: systemPrompt("session", prof.level, prof.language),
     user: userMessage(`Review my trading session on ${date}.`, data),
+    name: "session_review",
     schema: SessionSchema,
     effort: "medium",
   });
   if (!res.ok) return res;
-  const report = { output: res.data, verification: verifyNumbers(res.data, data), generatedAt: new Date().toISOString(), model: res.model, scope: date };
+  const report = { output: res.data, verification: verifyNumbers(res.data, data), generatedAt: new Date().toISOString(), model: res.model, cost: res.cost, scope: date };
   await store(userId, "SESSION", date, report);
   return { ok: true, report };
 }
@@ -101,19 +105,20 @@ export async function generateTradeFeedback(userId: string, tradeId: string): Pr
   const res = await callStructured({
     system: systemPrompt("trade", prof.level, prof.language),
     user: userMessage("Give me feedback on this trade.", data),
+    name: "trade_feedback",
     schema: TradeFeedbackSchema,
     effort: "low",
     maxTokens: 8000,
   });
   if (!res.ok) return res;
-  const report = { output: res.data, verification: verifyNumbers(res.data, data), generatedAt: new Date().toISOString(), model: res.model, scope: `${data.trade.symbol} · ${data.trade.date}` };
+  const report = { output: res.data, verification: verifyNumbers(res.data, data), generatedAt: new Date().toISOString(), model: res.model, cost: res.cost, scope: `${data.trade.symbol} · ${data.trade.date}` };
   await store(userId, "TRADE", tradeId, report);
   return { ok: true, report };
 }
 
 // ─── Ask your journal ─────────────────────────────────────────────────────────
 
-export type ChatFacts = { queries: { filter: string; result: unknown }[]; verification: Verification };
+export type ChatFacts = { queries: { filter: string; result: unknown }[]; verification: Verification; model?: string; cost?: number };
 export type ChatResult = { ok: true; answer: string; facts: ChatFacts } | AiFailure;
 
 const MAX_TOOL_ROUNDS = 6;
@@ -121,7 +126,6 @@ const MAX_TOOL_ROUNDS = 6;
 export async function askJournal(userId: string, question: string): Promise<ChatResult> {
   const missing = notConfigured();
   if (missing) return missing;
-  const { apiKey, model } = aiConfig() as { apiKey: string; model: string };
 
   const { prof, data } = await journalContext(userId);
   const trades = await loadReportTrades(userId);
@@ -139,56 +143,62 @@ export async function askJournal(userId: string, question: string): Promise<Chat
 
   // Recent conversation as plain text turns (the model re-queries numbers as needed).
   const history = await db.chatMessage.findMany({ where: { userId }, orderBy: { createdAt: "desc" }, take: 8 });
-  const messages: Anthropic.Beta.BetaMessageParam[] = [
+  const messages: ChatMessage[] = [
+    { role: "system", content: systemPrompt("chat", prof.level, prof.language) },
     ...history.reverse().map((m) => ({ role: m.role as "user" | "assistant", content: m.content })),
     { role: "user", content: `${question}\n\n<DATA>\n${JSON.stringify(background)}\n</DATA>` },
   ];
 
   const queries: ChatFacts["queries"] = [];
-  try {
-    for (let round = 0; round <= MAX_TOOL_ROUNDS; round++) {
-      const response = await getClient(apiKey).beta.messages.create({
-        model,
-        max_tokens: 16000,
-        system: [{ type: "text", text: systemPrompt("chat", prof.level, prof.language), cache_control: { type: "ephemeral" } }],
-        tools: [QUERY_TOOL as unknown as Anthropic.Beta.BetaTool],
-        tool_choice: { type: "auto" },
-        output_config: { effort: "medium" },
-        messages,
-        ...fallbackParams(model),
-      });
+  let cost = 0;
+  for (let round = 0; round <= MAX_TOOL_ROUNDS; round++) {
+    const r = await chatCompletion({
+      messages,
+      tools: [QUERY_TOOL_SPEC],
+      tool_choice: round === MAX_TOOL_ROUNDS ? "none" : "auto",
+      reasoning: { effort: "medium" },
+      max_tokens: 16000,
+    });
+    if (!r.ok) return r;
+    cost += r.meta.cost ?? 0;
 
-      if (response.stop_reason === "refusal") {
-        return { ok: false, reason: "refusal", message: "The coach declined that question. Ask about your own trades, habits or rules." };
-      }
-      // Keep the full assistant content (including thinking blocks) for the next round.
-      messages.push({ role: "assistant", content: response.content });
-
-      const toolUses = response.content.filter((b): b is Anthropic.Beta.BetaToolUseBlock => b.type === "tool_use");
-      if (toolUses.length === 0 || round === MAX_TOOL_ROUNDS) {
-        const answer = response.content
-          .filter((b): b is Anthropic.Beta.BetaTextBlock => b.type === "text")
-          .map((b) => b.text)
-          .join("\n")
-          .trim();
-        if (!answer) return { ok: false, reason: "parse", message: "The coach didn't return an answer. Please try again." };
-        const verification = verifyNumbers(answer, { background, queries: queries.map((q) => q.result) });
-        return { ok: true, answer, facts: { queries, verification } };
-      }
-
-      // Run every requested query in code and return all results in one user message.
-      const results: Anthropic.Beta.BetaToolResultBlockParam[] = toolUses.map((tu) => {
-        if (tu.name !== QUERY_TOOL.name) {
-          return { type: "tool_result", tool_use_id: tu.id, is_error: true, content: `Unknown tool ${tu.name}` };
-        }
-        const result = executeQuery(trades, tu.input as Partial<QueryInput>, { strategies: prof.names, capital: prof.capital });
-        queries.push({ filter: String(result.filter), result });
-        return { type: "tool_result", tool_use_id: tu.id, content: JSON.stringify(result) };
-      });
-      messages.push({ role: "user", content: results });
+    const choice = r.res.choices?.[0];
+    const msg = choice?.message;
+    if (msg?.refusal || choice?.finish_reason === "content_filter") {
+      return { ok: false, reason: "refusal", message: "The coach declined that question. Ask about your own trades, habits or rules." };
     }
-  } catch (e) {
-    return mapError(e);
+    // Echo the assistant turn back unchanged, including Gemini's reasoning_details,
+    // which reasoning models need to continue after tool results.
+    messages.push({ role: "assistant", content: msg?.content ?? null, tool_calls: msg?.tool_calls, reasoning_details: msg?.reasoning_details });
+
+    const calls = msg?.tool_calls ?? [];
+    if (calls.length === 0) {
+      const answer = (msg?.content ?? "").trim();
+      if (!answer) return { ok: false, reason: "parse", message: "The coach didn't return an answer. Please try again." };
+      const verification = verifyNumbers(answer, { background, queries: queries.map((q) => q.result) });
+      return { ok: true, answer, facts: { queries, verification, model: r.meta.model, cost } };
+    }
+
+    // Run every requested query in code; one tool message per call.
+    for (const call of calls) {
+      let content: string;
+      if (call.function.name !== QUERY_TOOL.name) {
+        content = JSON.stringify({ error: `Unknown tool ${call.function.name}` });
+      } else {
+        let input: Partial<QueryInput> = {};
+        try {
+          input = JSON.parse(call.function.arguments || "{}");
+        } catch {
+          content = JSON.stringify({ error: "Arguments were not valid JSON. Call the tool again with valid JSON." });
+          messages.push({ role: "tool", tool_call_id: call.id, content });
+          continue;
+        }
+        const result = executeQuery(trades, input, { strategies: prof.names, capital: prof.capital });
+        queries.push({ filter: String(result.filter), result });
+        content = JSON.stringify(result);
+      }
+      messages.push({ role: "tool", tool_call_id: call.id, content });
+    }
   }
   return { ok: false, reason: "api", message: "The coach took too many steps. Try a simpler question." };
 }

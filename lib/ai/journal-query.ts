@@ -44,6 +44,12 @@ export const QUERY_TOOL = {
   },
 };
 
+/** The same tool in Chat Completions "function" form (OpenRouter / Gemini). */
+export const QUERY_TOOL_SPEC = {
+  type: "function" as const,
+  function: { name: QUERY_TOOL.name, description: QUERY_TOOL.description, parameters: QUERY_TOOL.input_schema },
+};
+
 export type QueryInput = {
   from: string | null;
   to: string | null;

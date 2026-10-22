@@ -94,7 +94,7 @@ export default async function CoachPage({ searchParams }: { searchParams: Promis
           <div>
             <p className="font-medium">Connect the AI Coach</p>
             <p className="text-muted">
-              Add <code className="rounded bg-surface-2 px-1">ANTHROPIC_API_KEY=&quot;…&quot;</code> to the <code className="rounded bg-surface-2 px-1">.env</code> file in the project folder, then restart <code className="rounded bg-surface-2 px-1">npm run dev</code>. Everything else in TradeLens works without it.
+              Add <code className="rounded bg-surface-2 px-1">OPENROUTER_API_KEY</code> to the <code className="rounded bg-surface-2 px-1">.env</code> file in the project folder, then restart <code className="rounded bg-surface-2 px-1">npm run dev</code>. Everything else in TradeLens works without it.
             </p>
           </div>
         </div>

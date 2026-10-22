@@ -141,7 +141,7 @@ export function ChatPanel({ initial, aiEnabled }: { initial: ChatItem[]; aiEnabl
           onChange={(e) => setDraft(e.target.value)}
           maxLength={500}
           disabled={!aiEnabled}
-          placeholder={aiEnabled ? "e.g. What's my win rate on expiry days?" : "AI Coach is off: add ANTHROPIC_API_KEY to .env"}
+          placeholder={aiEnabled ? "e.g. What's my win rate on expiry days?" : "AI Coach is off: add OPENROUTER_API_KEY to .env"}
           className="input flex-1"
           aria-label="Ask a question about your trading"
         />
