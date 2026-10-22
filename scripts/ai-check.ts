@@ -11,7 +11,7 @@ import { aiConfig, chatCompletion } from "@/lib/ai/client";
   const r = await chatCompletion({
     messages: [{ role: "user", content: "In one sentence, what is a trading journal for?" }],
     reasoning: { effort: "low" },
-    max_tokens: 300,
+    max_tokens: 1500,
   });
   if (!r.ok) {
     console.error(`Failed (${r.reason}): ${r.message}`);
