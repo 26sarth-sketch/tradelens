@@ -1,5 +1,5 @@
 // TradeLens data model.
-// SQLite: "enum-like" fields are Strings validated by the TS unions in lib/types.ts.
+// PostgreSQL (Neon): "enum-like" fields are Strings validated by the TS unions in lib/types.ts.
 // List fields are JSON-encoded Strings. Money is Float rupees rounded to 2 decimals.
 // All DateTimes are UTC instants; display and day-grouping use IST (lib/format.ts).
 
@@ -8,7 +8,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 

@@ -9,8 +9,8 @@ Sections 3–6 are run twice: once locally (`npm run dev`) and once on the Verce
 
 | # | Decision | Why it matters | Recommended |
 |---|----------|----------------|-------------|
-| D1 ✅ Turso | **Where the database lives** | Vercel's filesystem is read-only and resets, so `prisma/dev.db` can't be written there. | **Turso** (hosted SQLite, free tier). Same schema; Prisma connects via the libSQL adapter. Alternative: Neon Postgres (schema provider change). Quickest but weakest: ship the seeded `dev.db` read-only, so nothing a judge enters is saved. |
-| D2 ✅ Vercel Blob | **Where screenshot uploads go** | `uploads/` is local disk; on Vercel files vanish. | **Vercel Blob** (free tier), or hide the screenshot upload on the hosted demo. |
+| D1 ✅ Neon (Postgres), replaced Turso | **Where the database lives** | Vercel's filesystem is read-only and resets, so `prisma/dev.db` can't be written there. | **Turso** (hosted SQLite, free tier). Same schema; Prisma connects via the libSQL adapter. Alternative: Neon Postgres (schema provider change). Quickest but weakest: ship the seeded `dev.db` read-only, so nothing a judge enters is saved. |
+| D2 ✅ Screenshots off on Vercel (Blob optional) | **Where screenshot uploads go** | `uploads/` is local disk; on Vercel files vanish. | **Vercel Blob** (free tier), or hide the screenshot upload on the hosted demo. |
 | D3 | **GitHub repo visibility** | Public repos are visible to everyone; secrets must never be in history. | Public for the hackathon (history already scanned clean, see 1.3). |
 | D4 | **AI key on the hosted demo** | Anyone with the URL can spend the key's credits. | Use a **separate OpenRouter key with a low credit limit** (e.g. $3) for Vercel. Top up the account first (≈ $2 left). |
 | D5 | **Demo data on the hosted DB** | Judges should land on a full story. | Seed the hosted DB once with `npm run db:seed`. "Reset to demo data" in Settings re-seeds. |
@@ -153,6 +153,10 @@ Note model and cost from the card footer / server log for each.
 - Secrets re-scanned before pushing: no `.env`, `.env.turso`, database or uploads tracked; no OpenRouter key, JWT-style token or Blob token anywhere in history. Commit author is a local machine address, no personal email.
 - Public repo: https://github.com/26sarth-sketch/tradelens (default branch `main`, 221 files, HEAD `c568cf1` matches local).
 - Fresh clone + `npm install && npm run dev`: `.env` created from the example, SQLite set up, demo journal seeded (193 trades), all main pages 200, Coach shows the "add a key" banner.
+
+### Switch to Neon (22 Oct 2026)
+
+Database moved from SQLite/Turso to PostgreSQL on Neon (project `tradelens`, Singapore, branches `main` for the live demo and `dev` for local). Re-verified on Neon: tests 117 pass; all main pages 200; symbol search and filters; Zerodha import + duplicate detection (0 new, 20 fills recognised); first-import AI analysis saved to Neon; Reset to demo data in 11 s. Seed on Neon `main`: 193 trades, net ₹13,343.23 (same as before).
 
 ## 9. Deploy to Vercel
 

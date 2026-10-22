@@ -10,14 +10,13 @@ Built for NSE/BSE equity (intraday and delivery) and F&O (index and stock future
 
 ## Quick start
 
-Requires **Node.js 20+**.
+Requires **Node.js 20+** and a free **[Neon](https://neon.tech)** PostgreSQL database.
 
-```bash
-npm install
-npm run dev
-```
+1. Create a Neon project and copy its connection string.
+2. `npm install`, then put the string in `.env` as `DATABASE_URL="postgresql://..."` (the first `npm run dev` creates `.env` from `.env.example` and stops with a reminder if the URL is still the placeholder).
+3. `npm run dev`
 
-Open **http://localhost:3000**. The first run creates `.env` from `.env.example`, creates the SQLite database (`prisma/dev.db`) and loads ~60 trading days of demo data for a sample trader ("Aarav").
+Open **http://localhost:3000**. The first run creates the tables and loads ~60 trading days of demo data for a sample trader ("Aarav"). Tip: use a separate Neon *branch* for local work, so "Reset to demo data" never touches the live database.
 
 ### Turn on the AI Coach (optional)
 
@@ -100,31 +99,25 @@ The AI Coach uses Google Gemini models through OpenRouter only: the model must s
 | `npm run set-key` | Save your OpenRouter API key to `.env` from a hidden prompt |
 | `npm run ai:check` | One short test call to the AI model; prints the reply, model and cost |
 | `npm run db:seed` | Wipe and reload the demo data |
-| `npm run db:turso` | One-time setup of the hosted Turso DB: create tables, load demo data (reads `.env.turso`) |
 | `npx tsx scripts/check-seed.ts` | Print the demo patterns (plan vs no plan, expiry, after 2 PM, revenge) |
 | `npm test` | Unit tests (charges, import, stats, reports, rules, score, AI verifier, …) |
 | `npm run typecheck` / `npm run lint` | TypeScript and ESLint |
 | `npm run db:studio` | Browse the database in Prisma Studio |
 
-## Deploy to Vercel
+## Deploy to Vercel + Neon
 
-Local dev uses the SQLite file and `uploads/`. Vercel's filesystem is read-only, so the deployed app uses **Turso** (hosted SQLite) and a **private Vercel Blob** store instead. The code switches automatically when the variables below are set.
+The database is **Neon** (PostgreSQL) and the app runs on **Vercel**.
 
-1. **Turso:** create a database at [turso.tech](https://turso.tech) and an auth token for it. Put both in a new file `.env.turso` (git-ignored):
-   ```
-   TURSO_DATABASE_URL="libsql://<db>-<org>.turso.io"
-   TURSO_AUTH_TOKEN="..."
-   ```
-   Then run `npm run db:turso` once: it creates the tables and loads the demo journal.
-2. **Vercel:** import the GitHub repo (framework: Next.js). In Settings → Environment Variables add `TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN`, `OPENROUTER_API_KEY` (use a separate key with a credit limit) and `OPENROUTER_MODEL=google/gemini-3.7-flash`.
-3. **Blob (optional):** screenshots are switched off on Vercel unless you add a store. To enable them: Vercel project → Storage → Create → Blob, choose **Private** access and connect it to the project. This adds `BLOB_READ_WRITE_TOKEN`.
-4. Redeploy. The build skips the local SQLite setup on Vercel. AI pages allow up to 300 s per request.
+1. **Neon:** create a project (Singapore is the closest region to India). Run `DATABASE_URL="<direct connection string>" npx prisma db push` once to create the tables, then `DATABASE_URL="<connection string>" npm run db:seed` to load the demo journal.
+2. **Vercel:** import the GitHub repo (framework: Next.js) and add the environment variables `DATABASE_URL` (Neon, pooled string), `OPENROUTER_API_KEY` (use a separate key with a credit limit) and `OPENROUTER_MODEL=google/gemini-3.7-flash`.
+3. Deploy. The build skips database setup on Vercel. AI pages allow up to 300 s per request.
+4. **Screenshots (optional):** they are switched off on Vercel unless you connect a private Blob store (Vercel project → Storage → Create → Blob). That adds `BLOB_READ_WRITE_TOKEN`.
 
-Schema changes later: Prisma Migrate can't reach Turso; generate SQL with `npx prisma migrate diff --from-url file:./prisma/dev.db --to-schema-datamodel prisma/schema.prisma --script` and run it in the Turso dashboard's SQL shell.
+Schema changes later: edit `prisma/schema.prisma`, then run `npx prisma db push` with the direct (non-pooler) connection string of each database.
 
 ## Tech stack
 
-Next.js 16 (App Router) · TypeScript · Tailwind CSS v4 (dark by default) · SQLite + Prisma 6 (Turso via the libSQL adapter when deployed) · Vercel Blob for screenshots · Recharts · Google Gemini via OpenRouter (structured outputs, tool calling, Google-only routing) · Zod.
+Next.js 16 (App Router) · TypeScript · Tailwind CSS v4 (dark by default) · PostgreSQL (Neon) + Prisma 6 · Vercel · Recharts · Google Gemini via OpenRouter (structured outputs, tool calling, Google-only routing) · Zod.
 
 ## Project layout
 
