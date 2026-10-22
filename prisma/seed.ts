@@ -48,6 +48,25 @@ const TAGS: Record<TagKey, { name: string; color: string }> = {
   A_PLUS: { name: "A+ setup", color: "#22c55e" },
 };
 
+// Separate random stream for checklists so the trade data (and its story) doesn't change.
+let checkSeed = 2710;
+const checkRand = () => {
+  checkSeed = (checkSeed * 1103515245 + 12345) % 2147483648;
+  return checkSeed / 2147483648;
+};
+
+/** Which playbook rules a demo trade "ticked": disciplined and winning trades tick more. */
+function demoChecklist(key: StrategyKey, followed: boolean, win: boolean): string[] {
+  const s = STRATEGIES[key];
+  const ids = [
+    ...s.entry.map((_, i) => `e${i + 1}`),
+    ...s.exit.map((_, i) => `x${i + 1}`),
+    ...s.risk.map((_, i) => `r${i + 1}`),
+  ];
+  const p = (followed ? 0.82 : 0.35) + (win ? 0.08 : -0.12);
+  return ids.filter(() => checkRand() < p);
+}
+
 async function main() {
   const now = new Date();
   // Find the first generator seed whose data tells the demo story (usually < 50 tries).
@@ -136,8 +155,8 @@ async function main() {
         highPrice: t.highPrice,
         lowPrice: t.lowPrice,
         tags: { create: t.tags.map((k) => ({ tagId: tagIds[k] })) },
-        ruleChecks: strategyId && t.followedPlan
-          ? { create: { strategyId, checkedRules: JSON.stringify(["e1", "e2", "x1", "r1"]) } }
+        ruleChecks: strategyId && t.strategy && (t.followedPlan || checkRand() < 0.6)
+          ? { create: { strategyId, checkedRules: JSON.stringify(demoChecklist(t.strategy, t.followedPlan === true, data.netPnl > 0)) } }
           : undefined,
       },
     });
