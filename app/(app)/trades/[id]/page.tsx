@@ -75,7 +75,7 @@ export default async function TradeDetailPage({
       <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div>
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-2xl font-semibold tracking-tight">{t.symbol}</h1>
+            <h1 className="sign text-xl leading-8 sm:text-2xl">{t.symbol}</h1>
             <span className={clsx("rounded px-2 py-0.5 text-xs", t.direction === "LONG" ? "bg-profit/15 text-profit" : "bg-loss/15 text-loss")}>
               {t.direction === "LONG" ? "Long" : "Short"}
             </span>
@@ -131,7 +131,7 @@ export default async function TradeDetailPage({
                 <span className="font-medium text-warn">{pct.toFixed(1)}%</span>
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-surface-2">
-                <div className="h-full bg-warn" style={{ width: `${Math.min(pct, 100)}%` }} />
+                <div className="bar-grow h-full bg-warn" style={{ width: `${Math.min(pct, 100)}%` }} />
               </div>
             </div>
           ) : (

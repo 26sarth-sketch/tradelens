@@ -30,7 +30,7 @@ export default async function LessonPage({ params }: { params: Promise<{ slug: s
       <p className="flex items-center gap-2 text-xs text-muted">
         Lesson {i + 1} of {lessons.length} · <Clock size={12} /> {lesson.minutes} min
       </p>
-      <h1 className="mt-1 text-3xl font-semibold tracking-tight">{lesson.title}</h1>
+      <h1 className="sign mt-1 text-2xl leading-9 sm:text-3xl">{lesson.title}</h1>
       <p className="mt-2 text-lg text-muted">{lesson.summary}</p>
 
       <RichText text={lesson.body} className="mt-6 space-y-3 text-[15px] leading-relaxed [&_li]:my-1 [&_strong]:text-fg" />

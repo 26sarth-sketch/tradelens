@@ -86,6 +86,7 @@ export function RiskWidget({
                 <span
                   className={clsx(
                     "rounded px-1.5 py-0.5 text-[10px] font-medium uppercase",
+                    s.state === "breached" && "pulse-loss",
                     s.state === "ok" && "bg-profit/15 text-profit",
                     s.state === "warning" && "bg-warn/15 text-warn",
                     s.state === "breached" && "bg-loss/15 text-loss",
@@ -98,7 +99,7 @@ export function RiskWidget({
             {s.rule !== "TIME_CUTOFF" && (
               <div className="h-1.5 overflow-hidden rounded-full bg-surface-2" aria-hidden>
                 <div
-                  className={clsx("h-full rounded-full", s.state === "breached" ? "bg-loss" : s.state === "warning" ? "bg-warn" : "bg-profit")}
+                  className={clsx("bar-grow h-full rounded-full", s.state === "breached" ? "bg-loss" : s.state === "warning" ? "bg-warn" : "bg-profit")}
                   style={{ width: `${Math.min(100, s.used * 100)}%` }}
                 />
               </div>
@@ -119,7 +120,7 @@ export function RiskWidget({
               role="listitem"
               href={`/journal/${h.date}`}
               title={`${formatDateIST(h.date)}: ${h.breaches ? `${h.breaches} breach${h.breaches > 1 ? "es" : ""}` : "clean"}`}
-              className={clsx("h-6 flex-1 rounded-sm", h.breaches ? "bg-loss/70 hover:bg-loss" : "bg-profit/40 hover:bg-profit/70")}
+              className={clsx("h-6 flex-1 rounded-sm transition-transform duration-150 hover:-translate-y-0.5", h.breaches ? "bg-loss/70 hover:bg-loss" : "bg-profit/40 hover:bg-profit/70")}
             >
               <span className="sr-only">{h.date}: {h.breaches} breaches</span>
             </Link>

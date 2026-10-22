@@ -16,7 +16,7 @@ const ruleList = (prefix: string) =>
 const StrategySchema = z.object({
   name: z.string().trim().min(1, "Give your strategy a name").max(60),
   description: z.string().trim().max(1000).default(""),
-  color: z.string().regex(/^#[0-9a-fA-F]{6}$/).default("#6d5efc"),
+  color: z.string().regex(/^#[0-9a-fA-F]{6}$/).default("#ffc83d"),
   entryRules: ruleList("e"),
   exitRules: ruleList("x"),
   riskRules: ruleList("r"),

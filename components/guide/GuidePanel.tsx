@@ -106,15 +106,17 @@ export function GuidePanel({ progress: initialProgress, aiEnabled }: { progress:
     <>
       {/* Floating button */}
       {!open && (
-        <button
-          type="button"
-          onClick={() => toggle(true)}
-          aria-label="Open the TradeLens Guide"
-          className="btn-primary fixed bottom-4 right-4 z-40 rounded-full px-4 py-3 shadow-xl"
-        >
-          {pulse && <span className="absolute inset-0 -z-10 animate-ping rounded-full bg-accent/40" aria-hidden />}
-          <Compass size={20} /> <span className="hidden sm:inline">Guide</span>
-        </button>
+        <div className="fixed bottom-4 right-4 z-40">
+          {pulse && <span className="absolute inset-0 animate-ping rounded-full bg-accent/40" aria-hidden />}
+          <button
+            type="button"
+            onClick={() => toggle(true)}
+            aria-label="Open the TradeLens Guide"
+            className="btn-primary relative rounded-full px-4 py-3 shadow-xl"
+          >
+            <Compass size={20} /> <span className="hidden sm:inline">Guide</span>
+          </button>
+        </div>
       )}
 
       {open && <div className="fixed inset-0 z-40 bg-black/50 sm:hidden" onClick={() => toggle(false)} aria-hidden />}

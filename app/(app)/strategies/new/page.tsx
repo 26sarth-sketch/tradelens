@@ -17,7 +17,7 @@ export default function NewStrategyPage() {
         initial={{
           name: "",
           description: "",
-          color: "#6d5efc",
+          color: "#ffc83d",
           entryRules: [{ id: "e1", text: "" }],
           exitRules: [{ id: "x1", text: "" }],
           riskRules: [{ id: "r1", text: "" }],

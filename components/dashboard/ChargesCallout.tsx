@@ -27,8 +27,8 @@ export function ChargesCallout({ gross, charges }: { gross: number; charges: num
         </span>
       </div>
       <div className="flex h-3 gap-0.5 overflow-hidden rounded-full" aria-hidden>
-        <div className="rounded-l-full bg-profit" style={{ width: `${100 - pct}%` }} />
-        <div className="rounded-r-full bg-warn" style={{ width: `${pct}%` }} />
+        <div className="bar-grow rounded-l-full bg-profit" style={{ width: `${100 - pct}%` }} />
+        <div className="bar-grow rounded-r-full bg-warn" style={{ width: `${pct}%` }} />
       </div>
       <div className="mt-1.5 flex justify-between text-xs text-muted">
         <span>Kept</span>

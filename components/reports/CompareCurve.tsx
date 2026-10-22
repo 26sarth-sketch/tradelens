@@ -2,6 +2,7 @@
 
 import { CartesianGrid, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { formatINR, formatINRCompact } from "@/lib/format";
+import { useAnimateCharts } from "@/lib/use-motion";
 
 type Point = { n: number; a: number | null; b: number | null };
 
@@ -11,6 +12,7 @@ type Point = { n: number; a: number | null; b: number | null };
  * tooltip names each series, so identity never relies on colour alone.
  */
 export function CompareCurve({ data, nameA, nameB }: { data: Point[]; nameA: string; nameB: string }) {
+  const animate = useAnimateCharts();
   if (data.length < 2) return <p className="py-10 text-center text-sm text-muted">Not enough trades to draw curves.</p>;
   return (
     <div>
@@ -49,8 +51,8 @@ export function CompareCurve({ data, nameA, nameB }: { data: Point[]; nameA: str
                 );
               }}
             />
-            <Line type="monotone" dataKey="a" name={nameA} stroke="var(--series-a)" strokeWidth={2} dot={false} connectNulls={false} isAnimationActive={false} activeDot={{ r: 4, stroke: "var(--surface)", strokeWidth: 2 }} />
-            <Line type="monotone" dataKey="b" name={nameB} stroke="var(--series-b)" strokeWidth={2} dot={false} connectNulls={false} isAnimationActive={false} activeDot={{ r: 4, stroke: "var(--surface)", strokeWidth: 2 }} />
+            <Line type="monotone" dataKey="a" name={nameA} stroke="var(--series-a)" strokeWidth={2} dot={false} connectNulls={false} isAnimationActive={animate} animationDuration={1200} animationEasing="ease-out" activeDot={{ r: 4, stroke: "var(--surface)", strokeWidth: 2 }} />
+            <Line type="monotone" dataKey="b" name={nameB} stroke="var(--series-b)" strokeWidth={2} dot={false} connectNulls={false} isAnimationActive={animate} animationDuration={1200} animationEasing="ease-out" activeDot={{ r: 4, stroke: "var(--surface)", strokeWidth: 2 }} />
           </LineChart>
         </ResponsiveContainer>
       </div>

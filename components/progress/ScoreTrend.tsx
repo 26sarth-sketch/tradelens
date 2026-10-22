@@ -1,11 +1,13 @@
 "use client";
 
 import { CartesianGrid, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { useAnimateCharts } from "@/lib/use-motion";
 
 const short = (k: string) => new Date(`${k}T00:00:00Z`).toLocaleDateString("en-IN", { day: "2-digit", month: "short", timeZone: "UTC" });
 
 /** Rolling Lens Score (0–100). Single series; the 50 line marks "Developing". */
 export function ScoreTrend({ data }: { data: { date: string; score: number }[] }) {
+  const animate = useAnimateCharts();
   if (data.length < 2) return <p className="py-10 text-center text-sm text-muted">Needs at least 21 trading days to show a trend.</p>;
   return (
     <div className="h-56 w-full">
@@ -28,7 +30,7 @@ export function ScoreTrend({ data }: { data: { date: string; score: number }[] }
               );
             }}
           />
-          <Line type="monotone" dataKey="score" stroke="var(--accent)" strokeWidth={2} dot={false} activeDot={{ r: 4, stroke: "var(--surface)", strokeWidth: 2 }} isAnimationActive={false} />
+          <Line type="monotone" dataKey="score" stroke="var(--accent)" strokeWidth={2} dot={false} activeDot={{ r: 4, stroke: "var(--surface)", strokeWidth: 2 }} isAnimationActive={animate} animationDuration={1100} animationEasing="ease-out" />
         </LineChart>
       </ResponsiveContainer>
     </div>

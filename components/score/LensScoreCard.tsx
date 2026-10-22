@@ -45,7 +45,7 @@ export function LensScoreCard({ score, compact = false, scope }: { score: LensSc
                 </span>
                 <span className="tabular w-8 text-right font-medium">{c.score}</span>
                 <span className="col-span-2 h-1 overflow-hidden rounded-full bg-surface-2" aria-hidden>
-                  <span className={clsx("block h-full rounded-full", tone(c.score))} style={{ width: `${c.score}%` }} />
+                  <span className={clsx("bar-grow block h-full rounded-full", tone(c.score))} style={{ width: `${c.score}%` }} />
                 </span>
               </li>
             ))}

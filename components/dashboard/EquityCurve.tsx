@@ -1,6 +1,7 @@
 "use client";
 
 import clsx from "clsx";
+import { useAnimateCharts } from "@/lib/use-motion";
 import { Area, AreaChart, CartesianGrid, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { formatView } from "@/components/ui/ViewValue";
 import { formatINRCompact, formatNumber, pnlClass } from "@/lib/format";
@@ -22,6 +23,7 @@ function axisValue(view: View, v: number) {
 
 /** Single-series cumulative curve: one accent line, soft fill, zero baseline, crosshair tooltip. */
 export function EquityCurve({ data, view }: { data: EquityPoint[]; view: View }) {
+  const animate = useAnimateCharts();
   if (data.length < 2) {
     return <p className="py-16 text-center text-sm text-muted">Not enough trading days to draw a curve yet.</p>;
   }
@@ -86,7 +88,7 @@ export function EquityCurve({ data, view }: { data: EquityPoint[]; view: View })
             strokeWidth={2}
             fill="url(#equityFill)"
             activeDot={{ r: 4, stroke: "var(--surface)", strokeWidth: 2 }}
-            isAnimationActive={false}
+            isAnimationActive={animate} animationDuration={1200} animationEasing="ease-out"
           />
         </AreaChart>
       </ResponsiveContainer>

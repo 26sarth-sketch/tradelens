@@ -19,11 +19,11 @@ function NavLink({ item, onNavigate }: { item: NavItem; onNavigate?: () => void 
       href={item.href}
       onClick={onNavigate}
       className={clsx(
-        "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
+        "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all duration-200",
         active ? "bg-accent/15 text-fg shadow-[inset_3px_0_0_var(--accent)]" : "text-white/65 hover:bg-white/10 hover:text-fg",
       )}
     >
-      <Icon size={18} className={active ? "text-accent" : undefined} />
+      <Icon size={18} className={clsx("transition-transform duration-200 group-hover:translate-x-0.5 group-hover:scale-110", active && "text-accent")} />
       {item.label}
     </Link>
   );

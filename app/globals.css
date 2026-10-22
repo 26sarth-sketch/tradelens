@@ -127,3 +127,198 @@ html[data-privacy] .money-chart .recharts-tooltip-wrapper {
   --series-a: #3987e5;
   --series-b: #d95926;
 }
+
+/* ═════════════════════════ Motion & polish (shared with the landing page's feel) ═════════════════════════
+   Everything here is transform/opacity only (cheap, no layout shift) and switches off for
+   visitors who prefer reduced motion (see the block at the very end). */
+
+:root {
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+html {
+  scrollbar-width: thin;
+  scrollbar-color: #2b3646 transparent;
+}
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes grow-x {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+@keyframes shimmer {
+  to { background-position: -200% 0; }
+}
+@keyframes bar-in {
+  from { width: 0; }
+}
+@keyframes drift-a {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(7vw, 5vh, 0) scale(1.08); }
+}
+@keyframes drift-b {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1.05); }
+  50% { transform: translate3d(-8vw, -6vh, 0) scale(0.95); }
+}
+@keyframes pulse-loss {
+  0%, 100% { box-shadow: 0 0 0 0 rgb(240 82 82 / 0); }
+  50% { box-shadow: 0 0 12px 1px rgb(240 82 82 / 0.5); }
+}
+
+/* Page entrance: the content block fades up, then cards and rows inside grids follow one after another. */
+.page-enter {
+  animation: rise 0.45s var(--ease-out) backwards;
+}
+.page-enter :where(.grid, .stagger) > :nth-child(-n + 12) {
+  animation: rise 0.55s var(--ease-out) backwards;
+}
+.page-enter :where(.grid, .stagger) > :nth-child(2) { animation-delay: 50ms; }
+.page-enter :where(.grid, .stagger) > :nth-child(3) { animation-delay: 100ms; }
+.page-enter :where(.grid, .stagger) > :nth-child(4) { animation-delay: 150ms; }
+.page-enter :where(.grid, .stagger) > :nth-child(5) { animation-delay: 200ms; }
+.page-enter :where(.grid, .stagger) > :nth-child(6) { animation-delay: 250ms; }
+.page-enter :where(.grid, .stagger) > :nth-child(7) { animation-delay: 300ms; }
+.page-enter :where(.grid, .stagger) > :nth-child(8) { animation-delay: 350ms; }
+.page-enter :where(.grid, .stagger) > :nth-child(9) { animation-delay: 400ms; }
+.page-enter :where(.grid, .stagger) > :nth-child(10) { animation-delay: 450ms; }
+.page-enter :where(.grid, .stagger) > :nth-child(11) { animation-delay: 500ms; }
+.page-enter :where(.grid, .stagger) > :nth-child(12) { animation-delay: 550ms; }
+
+/* Progress bars fill in from the left. */
+.bar-grow {
+  transform-origin: left center;
+  animation: grow-x 0.9s var(--ease-out) 0.2s backwards;
+}
+
+/* Page title: a lit gold underline that draws itself. */
+.title-bar {
+  display: block;
+  height: 3px;
+  width: 3rem;
+  margin-top: 0.55rem;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent), #ffe08a);
+  box-shadow: 0 0 14px rgb(255 200 61 / 0.55);
+  animation: bar-in 0.8s var(--ease-out) 0.15s backwards;
+}
+
+/* Cards: a soft gold glow on hover; stat tiles also lift. */
+.card-glow {
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+.card-glow:hover {
+  border-color: rgb(255 200 61 / 0.28);
+  box-shadow: 0 10px 30px -16px rgb(255 200 61 / 0.3), inset 0 1px 0 rgb(255 255 255 / 0.05);
+}
+.card-lift {
+  transition: transform 0.25s var(--ease-out), border-color 0.25s, box-shadow 0.25s;
+}
+.card-lift:hover {
+  transform: translateY(-3px);
+  border-color: rgb(255 200 61 / 0.4);
+  box-shadow: 0 14px 34px -14px rgb(255 200 61 / 0.32), inset 0 1px 0 rgb(255 255 255 / 0.06);
+}
+
+/* Table rows light up under the cursor. */
+table tbody tr {
+  transition: background-color 0.15s;
+}
+table tbody tr:hover {
+  background-color: rgb(255 200 61 / 0.045);
+}
+
+/* Danger badges breathe. */
+.pulse-loss {
+  animation: pulse-loss 1.8s ease-in-out infinite;
+}
+
+/* Loading skeleton with a gold shimmer. */
+.skel {
+  border-radius: 1rem;
+  background: linear-gradient(100deg, rgb(255 255 255 / 0.04) 30%, rgb(255 200 61 / 0.1) 50%, rgb(255 255 255 / 0.04) 70%) 0 0 / 200% 100%;
+  animation: shimmer 1.5s linear infinite;
+}
+
+/* Ambient glow: two slow-drifting colour pools behind the app, like light moving over felt. */
+.ambient {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.ambient::before,
+.ambient::after {
+  content: "";
+  position: absolute;
+  width: 70vmax;
+  height: 70vmax;
+  border-radius: 50%;
+  will-change: transform;
+}
+.ambient::before {
+  top: -35vmax;
+  left: 10vmax;
+  background: radial-gradient(circle, rgb(21 89 74 / 0.34), transparent 65%);
+  animation: drift-a 42s ease-in-out infinite;
+}
+.ambient::after {
+  bottom: -40vmax;
+  right: -15vmax;
+  background: radial-gradient(circle, rgb(255 200 61 / 0.07), transparent 65%);
+  animation: drift-b 56s ease-in-out infinite;
+}
+
+/* Playing-card surface (shared with the landing page): used for the Learn lessons. */
+.ivory-card {
+  background: linear-gradient(160deg, #fffdf6 0%, #f8f3e6 70%, #e9e1cb 100%);
+  color: #14171f;
+  border-radius: 1.1rem;
+  box-shadow: 0 12px 28px rgb(0 0 0 / 0.4);
+  transition: transform 0.3s var(--ease-out), box-shadow 0.3s;
+}
+.ivory-card:hover {
+  transform: translateY(-5px) rotate(-0.6deg);
+  box-shadow: 0 20px 38px rgb(0 0 0 / 0.5), 0 0 0 1px rgb(255 200 61 / 0.5);
+}
+
+/* 3D gold buttons get a light sweep on hover. */
+.btn-primary {
+  position: relative;
+  overflow: hidden;
+}
+.btn-primary::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 30%, rgb(255 255 255 / 0.5) 50%, transparent 70%);
+  transform: translateX(-130%);
+  pointer-events: none;
+}
+.btn-primary:hover::after {
+  transform: translateX(130%);
+  transition: transform 0.75s var(--ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .ambient {
+    display: none;
+  }
+}

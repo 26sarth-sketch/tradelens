@@ -114,7 +114,7 @@ export default async function ProgressPage() {
                     <span className="tabular text-muted">{r.count} · last {formatDateIST(r.last)}</span>
                   </div>
                   <div className="h-1.5 overflow-hidden rounded-full bg-surface-2" aria-hidden>
-                    <div className="h-full rounded-full bg-loss" style={{ width: `${(r.count / maxRule) * 100}%` }} />
+                    <div className="bar-grow h-full rounded-full bg-loss" style={{ width: `${(r.count / maxRule) * 100}%` }} />
                   </div>
                 </li>
               ))}

@@ -57,7 +57,7 @@ export default async function StrategyPage({ params }: { params: Promise<{ id: s
         <div className="max-w-2xl">
           <div className="flex items-center gap-2">
             <span className="h-3.5 w-3.5 rounded-full" style={{ background: s.color }} aria-hidden />
-            <h1 className="text-2xl font-semibold tracking-tight">{s.name}</h1>
+            <h1 className="sign text-xl leading-8 sm:text-2xl">{s.name}</h1>
           </div>
           {s.description && <p className="mt-1 text-sm text-muted">{s.description}</p>}
         </div>
@@ -120,7 +120,7 @@ export default async function StrategyPage({ params }: { params: Promise<{ id: s
                     {a.followedPct == null ? "—" : (
                       <span className="inline-flex items-center gap-2">
                         <span className="hidden h-1.5 w-16 overflow-hidden rounded-full bg-surface-2 sm:inline-block" aria-hidden>
-                          <span className="block h-full bg-accent" style={{ width: `${a.followedPct}%` }} />
+                          <span className="bar-grow block h-full bg-accent" style={{ width: `${a.followedPct}%` }} />
                         </span>
                         {a.followedPct.toFixed(0)}%
                       </span>

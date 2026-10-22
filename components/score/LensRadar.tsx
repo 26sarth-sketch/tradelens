@@ -2,9 +2,11 @@
 
 import { PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart, ResponsiveContainer, Tooltip } from "recharts";
 import type { ScoreComponent } from "@/lib/score";
+import { useAnimateCharts } from "@/lib/use-motion";
 
 /** Six-axis radar of the Lens Score components (0–100). Single series, so no legend. */
 export function LensRadar({ components }: { components: ScoreComponent[] }) {
+  const animate = useAnimateCharts();
   return (
     <div className="h-56 w-full">
       <ResponsiveContainer width="100%" height="100%">
@@ -25,7 +27,7 @@ export function LensRadar({ components }: { components: ScoreComponent[] }) {
               );
             }}
           />
-          <Radar dataKey="score" stroke="var(--accent)" strokeWidth={2} fill="var(--accent)" fillOpacity={0.22} dot={{ r: 3, fill: "var(--accent)" }} isAnimationActive={false} />
+          <Radar dataKey="score" stroke="var(--accent)" strokeWidth={2} fill="var(--accent)" fillOpacity={0.22} dot={{ r: 3, fill: "var(--accent)" }} isAnimationActive={animate} animationDuration={900} animationEasing="ease-out" />
         </RadarChart>
       </ResponsiveContainer>
     </div>

@@ -42,7 +42,7 @@ export default async function JournalDayPage({ params }: { params: Promise<{ dat
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <Link href={`/journal/${shiftDay(date, -1)}`} aria-label="Previous day" className="rounded-md p-1 text-muted hover:bg-surface-2"><ChevronLeft size={20} /></Link>
-          <h1 className="text-2xl font-semibold tracking-tight">{label}</h1>
+          <h1 className="sign text-xl leading-8 sm:text-2xl">{label}</h1>
           <Link href={`/journal/${shiftDay(date, 1)}`} aria-label="Next day" className="rounded-md p-1 text-muted hover:bg-surface-2"><ChevronRight size={20} /></Link>
         </div>
         {trades.length > 0 && (

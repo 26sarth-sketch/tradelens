@@ -40,7 +40,7 @@ export function DisciplineGrid({ days, weeks = 12 }: { days: DayDiscipline[]; we
                 href={`/journal/${date}`}
                 title={`${formatDateIST(date)}: ${d.disciplined ? "disciplined" : `${d.breaches} rule breach${d.breaches === 1 ? "" : "es"}, ${d.brokePlan} trade${d.brokePlan === 1 ? "" : "s"} against plan`}`}
                 className={clsx(
-                  "flex h-6 items-center justify-center rounded-sm text-[10px] font-medium",
+                  "flex h-6 items-center justify-center rounded-sm text-[10px] font-medium transition-transform duration-150 hover:scale-110",
                   d.disciplined ? "bg-profit/45 text-fg hover:bg-profit/70" : "bg-loss/60 text-fg hover:bg-loss/80",
                 )}
               >

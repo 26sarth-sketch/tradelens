@@ -104,7 +104,7 @@ export function PnlCalendar({
                   href={`/journal/${c.date}`}
                   title={s ? `${s.trades} trade${s.trades > 1 ? "s" : ""}, ${s.wins} win${s.wins === 1 ? "" : "s"}` : "No trades"}
                   className={clsx(
-                    "flex min-h-16 flex-col justify-between rounded-lg border p-1.5 transition-colors hover:border-accent sm:p-2",
+                    "flex min-h-16 flex-col justify-between rounded-lg border p-1.5 transition-all duration-150 hover:z-10 hover:scale-[1.05] hover:border-accent sm:p-2",
                     s && s.valued > 0 ? cellTone(s.value, maxAbs) : s ? "bg-surface-2" : "bg-surface",
                     c.date === today ? "border-accent" : "border-transparent",
                   )}

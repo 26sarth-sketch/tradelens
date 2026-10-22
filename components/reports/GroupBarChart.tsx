@@ -2,6 +2,7 @@
 
 import { Bar, BarChart, CartesianGrid, Cell, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { formatINR, formatINRCompact } from "@/lib/format";
+import { useAnimateCharts } from "@/lib/use-motion";
 
 export type BarDatum = { label: string; value: number; count: number; winRate: number };
 
@@ -33,6 +34,7 @@ function RoundedEndBar(props: {
  * Colour = profit/loss; the tooltip always states the signed value too.
  */
 export function GroupBarChart({ data, horizontal = false }: { data: BarDatum[]; horizontal?: boolean }) {
+  const animate = useAnimateCharts();
   const height = horizontal ? Math.max(160, data.length * 34 + 40) : 260;
   const valueAxis = {
     tickFormatter: (v: number) => formatINRCompact(v),
@@ -85,7 +87,7 @@ export function GroupBarChart({ data, horizontal = false }: { data: BarDatum[]; 
               );
             }}
           />
-          <Bar dataKey="value" isAnimationActive={false} shape={(p: object) => <RoundedEndBar {...p} horizontal={horizontal} />}>
+          <Bar dataKey="value" isAnimationActive={animate} animationDuration={800} animationEasing="ease-out" shape={(p: object) => <RoundedEndBar {...p} horizontal={horizontal} />}>
             {data.map((d) => (
               <Cell key={d.label} fill={d.value >= 0 ? "var(--profit)" : "var(--loss)"} />
             ))}

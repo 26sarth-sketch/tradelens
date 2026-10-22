@@ -15,7 +15,7 @@ export function StatCard({
   learnHref?: string;
 }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-surface/90 p-4 shadow-[inset_0_1px_0_rgb(255_255_255/0.04)]">
+    <div className="card-lift rounded-2xl border border-white/10 bg-surface/90 p-4 shadow-[inset_0_1px_0_rgb(255_255_255/0.04)]">
       <div className="flex items-center gap-1.5 text-xs uppercase tracking-wide text-muted">
         {label}
         {info && <InfoTip learnHref={learnHref}>{info}</InfoTip>}

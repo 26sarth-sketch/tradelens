@@ -7,7 +7,7 @@ import { saveStrategy, type StrategyFormState } from "@/app/(app)/strategies/act
 import { newRuleId } from "@/lib/playbook";
 import type { Rule } from "@/lib/strategies";
 
-const COLORS = ["#6d5efc", "#3987e5", "#22c55e", "#f5a524", "#d95926", "#d55181", "#199e70", "#8a94a6"];
+const COLORS = ["#ffc83d", "#6d5efc", "#3987e5", "#22c55e", "#f5a524", "#d95926", "#d55181", "#199e70", "#8a94a6"];
 
 type Group = { key: "entryRules" | "exitRules" | "riskRules"; prefix: "e" | "x" | "r"; title: string; hint: string; placeholder: string };
 
