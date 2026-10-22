@@ -202,7 +202,9 @@ model TradeTag {
   tagId       String
   tag         Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
   aiSuggested Boolean @default(false)
-  accepted    Boolean @default(true) // false = AI suggestion awaiting review
+  accepted    Boolean @default(true) // false = auto-tag suggestion awaiting review (or dismissed)
+  dismissed   Boolean @default(false) // trader rejected the suggestion; never re-suggested
+  reason      String? // why the auto-tagger suggested it
 
   @@id([tradeId, tagId])
 }

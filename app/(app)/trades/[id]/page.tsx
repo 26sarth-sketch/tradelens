@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { ArrowLeft, CheckCircle2, Trash2 } from "lucide-react";
+import { ArrowLeft, Check, CheckCircle2, Sparkles, Trash2, X } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { TradeReviewForm } from "@/components/trades/TradeReviewForm";
@@ -15,6 +15,7 @@ import { parseIdList, parseRules } from "@/lib/strategies";
 import { excursions } from "@/lib/trades";
 import { getCurrentUser } from "@/lib/user";
 import { deleteTrade } from "../actions";
+import { decideSuggestion } from "../tags/actions";
 
 export const metadata = { title: "Trade" };
 
@@ -152,6 +153,36 @@ export default async function TradeDetailPage({
               )}
             </div>
           </Card>
+        )}
+
+        {t.tags.some((x) => !x.accepted && !x.dismissed) && (
+          <div className="rounded-xl border border-accent/30 bg-accent/5 p-4 lg:col-span-3">
+            <h2 className="mb-2 flex items-center gap-2 text-sm font-medium"><Sparkles size={16} className="text-accent" /> Auto-tagger suggestions</h2>
+            <ul className="space-y-2">
+              {t.tags.filter((x) => !x.accepted && !x.dismissed).map((x) => (
+                <li key={x.tagId} className="flex flex-wrap items-center justify-between gap-3 text-sm">
+                  <span>
+                    <span className="rounded-full bg-surface-2 px-2.5 py-0.5 font-medium">{x.tag.name}</span>
+                    {x.reason && <span className="ml-2 text-xs text-muted">{x.reason}</span>}
+                  </span>
+                  <span className="flex gap-1.5">
+                    <form action={decideSuggestion}>
+                      <input type="hidden" name="tradeId" value={t.id} />
+                      <input type="hidden" name="tagId" value={x.tagId} />
+                      <input type="hidden" name="decision" value="accept" />
+                      <button className="btn-ghost py-1 text-xs text-profit"><Check size={14} /> Accept</button>
+                    </form>
+                    <form action={decideSuggestion}>
+                      <input type="hidden" name="tradeId" value={t.id} />
+                      <input type="hidden" name="tagId" value={x.tagId} />
+                      <input type="hidden" name="decision" value="dismiss" />
+                      <button className="btn-ghost py-1 text-xs text-muted"><X size={14} /> Dismiss</button>
+                    </form>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
         )}
 
         <Card title="Review this trade" className="lg:col-span-3">

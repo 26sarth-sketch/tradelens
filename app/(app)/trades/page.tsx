@@ -1,12 +1,13 @@
 import type { Prisma } from "@prisma/client";
 import clsx from "clsx";
-import { Plus } from "lucide-react";
+import { Plus, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { Money } from "@/components/ui/Money";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { db } from "@/lib/db";
 import { formatDateIST, formatNumber, formatTimeIST, fromIST } from "@/lib/format";
 import { SEGMENT_LABELS, SEGMENTS, type Segment } from "@/lib/types";
+import { pendingSuggestionCount } from "@/lib/autotag-store";
 import { getCurrentUser } from "@/lib/user";
 
 export const metadata = { title: "Trade Log" };
@@ -44,6 +45,7 @@ export default async function TradeLogPage({ searchParams }: { searchParams: Pro
     db.trade.count({ where: { ...where, netPnl: { gt: 0 } } }),
   ]);
   const count = totals._count;
+  const pendingTags = await pendingSuggestionCount(user.id);
   const pages = Math.max(1, Math.ceil(count / PAGE_SIZE));
   const hasFilters = Boolean(sp.from || sp.to || sp.segment || sp.q || sp.result);
 
@@ -59,9 +61,14 @@ export default async function TradeLogPage({ searchParams }: { searchParams: Pro
         title="Trade Log"
         description="Every round trip, after Indian charges."
         actions={
-          <Link href="/trades/new" className="btn-primary">
-            <Plus size={16} /> Add trade
-          </Link>
+          <>
+            <Link href="/trades/tags" className="btn-ghost">
+              <Sparkles size={16} className="text-accent" /> Auto-tag{pendingTags > 0 && <span className="rounded-full bg-accent px-1.5 text-xs text-accent-fg">{pendingTags}</span>}
+            </Link>
+            <Link href="/trades/new" className="btn-primary">
+              <Plus size={16} /> Add trade
+            </Link>
+          </>
         }
       />
 

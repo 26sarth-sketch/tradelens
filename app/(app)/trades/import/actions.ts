@@ -9,6 +9,7 @@ import { commitImport, type ImportPreview, previewImport } from "@/lib/import/se
 import type { ParseResult } from "@/lib/import/types";
 import { NotZerodhaError, parseZerodhaTradebook } from "@/lib/import/zerodha";
 import type { ImportSource } from "@/lib/types";
+import { runAutoTagger } from "@/lib/autotag-store";
 import { recomputeBreaches } from "@/lib/rule-store";
 import { getCurrentUser } from "@/lib/user";
 
@@ -67,6 +68,7 @@ export async function commitUpload(formData: FormData): Promise<{ error?: string
     plan: user.profile?.brokeragePlan as BrokeragePlanKey | undefined,
   });
   await recomputeBreaches(user.id);
+  await runAutoTagger(user.id);
   revalidatePath("/trades");
   redirect(`/trades/import/${batch.id}`);
 }
