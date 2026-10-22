@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { fromIST } from "./format";
-import { buildTradeData, displaySymbol } from "./trades";
+import { buildTradeData, displaySymbol, excursions } from "./trades";
 
 const base = {
   exchange: "NSE" as const,
@@ -54,5 +54,29 @@ describe("buildTradeData", () => {
 describe("displaySymbol", () => {
   it("formats futures", () => {
     assert.equal(displaySymbol({ ...base, segment: "FUT", underlying: "BANKNIFTY" }), "BANKNIFTY FUT 27 Oct");
+  });
+});
+
+
+describe("excursions", () => {
+  it("long: MFE from the high, MAE from the low, money left on table", () => {
+    // entry 120, exit 150, high 170, low 110, qty 65
+    const e = excursions({ direction: "LONG", qty: 65, avgEntry: 120, avgExit: 150, highPrice: 170, lowPrice: 110 })!;
+    assert.equal(e.mfe, 3250); // 50 × 65
+    assert.equal(e.mae, 650); // 10 × 65
+    assert.equal(e.leftOnTable, 1300); // 20 × 65
+    assert.equal(e.capturedPct, 60); // 30 of 50
+  });
+
+  it("short: best price is the low", () => {
+    const e = excursions({ direction: "SHORT", qty: 10, avgEntry: 200, avgExit: 190, highPrice: 205, lowPrice: 180 })!;
+    assert.equal(e.bestPrice, 180);
+    assert.equal(e.mfe, 200);
+    assert.equal(e.mae, 50);
+    assert.equal(e.leftOnTable, 100);
+  });
+
+  it("null without high/low", () => {
+    assert.equal(excursions({ direction: "LONG", qty: 1, avgEntry: 1, avgExit: 2, highPrice: null, lowPrice: 1 }), null);
   });
 });

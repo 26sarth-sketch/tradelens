@@ -44,5 +44,5 @@ next-env.d.ts
 # local data
 /prisma/*.db
 /prisma/*.db-journal
-/public/uploads/*
-!/public/uploads/.gitkeep
+/uploads/*
+!/uploads/.gitkeep

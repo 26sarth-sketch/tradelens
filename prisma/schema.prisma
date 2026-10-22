@@ -141,7 +141,7 @@ model Trade {
   emotionAfter  String? // Emotion
   followedPlan  Boolean?
   notes         String    @default("")
-  screenshot    String? // path under /public/uploads
+  screenshot    String? // file name in /uploads, served by /api/uploads/<name>
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

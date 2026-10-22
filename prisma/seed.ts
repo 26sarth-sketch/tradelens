@@ -1,12 +1,16 @@
 // Demo seed: wipes the demo user's data and recreates ~60 trading days of trades.
 // Run with `npm run db:seed`. Also runs automatically on `npm run dev` if the DB is empty.
 
+import { readdir, unlink } from "node:fs/promises";
+import path from "node:path";
 import { PrismaClient } from "@prisma/client";
 import { fromIST } from "@/lib/format";
 import { buildTradeData } from "@/lib/trades";
 import { demoStory, generateDemo, isGoodStory, type StrategyKey, type TagKey } from "./demo-data";
 
 const db = new PrismaClient();
+// Same folder as lib/uploads.ts (not imported: that module is server-only).
+const UPLOAD_DIR = path.resolve(process.env.UPLOAD_DIR ?? "uploads");
 
 const STRATEGIES: Record<StrategyKey, { name: string; description: string; color: string; entry: string[]; exit: string[]; risk: string[] }> = {
   ORB: {
@@ -63,8 +67,11 @@ async function main() {
   if (!isGoodStory(story)) console.warn("[seed] no seed matched every story criterion; using the last one");
   const { journal, missed } = demo;
 
-  // Fresh start: one demo user.
+  // Fresh start: one demo user, and no orphaned screenshots from the old data.
   await db.user.deleteMany();
+  for (const f of await readdir(UPLOAD_DIR).catch(() => [] as string[])) {
+    if (f !== ".gitkeep") await unlink(path.join(UPLOAD_DIR, f)).catch(() => {});
+  }
   const user = await db.user.create({
     data: {
       name: "Aarav",

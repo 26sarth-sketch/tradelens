@@ -42,7 +42,7 @@ export function displaySymbol(t: Pick<RawTrade, "segment" | "underlying" | "opti
  * Planned R (reward:risk) from stop-loss and target, and the realised R-multiple
  * (net P&L ÷ ₹ risked). Both null when no stop-loss was set.
  */
-export function computeR(t: RawTrade, netPnl: number) {
+export function computeR(t: Pick<RawTrade, "avgEntry" | "qty" | "plannedSL" | "plannedTarget">, netPnl: number) {
   if (t.plannedSL == null) return { plannedR: null, rMultiple: null };
   const riskPerUnit = Math.abs(t.avgEntry - t.plannedSL);
   if (riskPerUnit === 0) return { plannedR: null, rMultiple: null };
@@ -99,5 +99,40 @@ export function buildTradeData(t: RawTrade, plan?: BrokeragePlanKey) {
     plannedSL: t.plannedSL ?? null,
     plannedTarget: t.plannedTarget ?? null,
     ...computeR(t, pnl.netPnl),
+  };
+}
+
+/**
+ * Max favourable / adverse excursion from the manually entered high and low during
+ * the trade, in ₹ (gross, per the whole position):
+ *   MFE  = best open profit you were ever sitting on
+ *   MAE  = worst open loss you sat through
+ *   left = extra you'd have made exiting at the best price instead of your exit
+ * Null when high/low weren't entered.
+ */
+export function excursions(t: {
+  direction: string;
+  qty: number;
+  avgEntry: number;
+  avgExit: number;
+  highPrice: number | null;
+  lowPrice: number | null;
+}) {
+  if (t.highPrice == null || t.lowPrice == null) return null;
+  const long = t.direction === "LONG";
+  const best = long ? t.highPrice : t.lowPrice;
+  const worst = long ? t.lowPrice : t.highPrice;
+  const sign = long ? 1 : -1;
+  const mfe = Math.max(0, (best - t.avgEntry) * sign * t.qty);
+  const mae = Math.max(0, (t.avgEntry - worst) * sign * t.qty);
+  const leftOnTable = Math.max(0, (best - t.avgExit) * sign * t.qty);
+  // Share of the best available move you captured (null if there was no favourable move).
+  const captured = mfe > 0 ? ((t.avgExit - t.avgEntry) * sign * t.qty) / mfe : null;
+  return {
+    bestPrice: best,
+    mfe: round2(mfe),
+    mae: round2(mae),
+    leftOnTable: round2(leftOnTable),
+    capturedPct: captured == null ? null : Math.round(captured * 100),
   };
 }

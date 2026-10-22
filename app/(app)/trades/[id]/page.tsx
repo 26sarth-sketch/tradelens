@@ -2,6 +2,7 @@ import clsx from "clsx";
 import { ArrowLeft, CheckCircle2, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { TradeReviewForm } from "@/components/trades/TradeReviewForm";
 import { Card, Stat } from "@/components/ui/Card";
 import { ConfirmButton } from "@/components/ui/ConfirmButton";
 import { Money } from "@/components/ui/Money";
@@ -10,6 +11,8 @@ import { db } from "@/lib/db";
 import { formatDateIST, formatDateTimeIST, formatNumber, formatTimeIST, pnlClass } from "@/lib/format";
 import { isIndex } from "@/lib/expiry";
 import { SEGMENT_LABELS, type Segment } from "@/lib/types";
+import { parseIdList, parseRules } from "@/lib/strategies";
+import { excursions } from "@/lib/trades";
 import { getCurrentUser } from "@/lib/user";
 import { deleteTrade } from "../actions";
 
@@ -32,9 +35,14 @@ export default async function TradeDetailPage({
   const [{ id }, sp, user] = await Promise.all([params, searchParams, getCurrentUser()]);
   const t = await db.trade.findFirst({
     where: { id, userId: user.id },
-    include: { strategy: true, tags: { include: { tag: true } } },
+    include: { strategy: true, tags: { include: { tag: true } }, ruleChecks: true },
   });
   if (!t) notFound();
+  const [strategies, allTags] = await Promise.all([
+    db.strategy.findMany({ where: { userId: user.id }, orderBy: { createdAt: "asc" } }),
+    db.tag.findMany({ where: { userId: user.id }, orderBy: { name: "asc" }, select: { name: true } }),
+  ]);
+  const exc = excursions(t);
 
   const charges = [
     { label: "Brokerage", value: t.brokerage },
@@ -96,7 +104,7 @@ export default async function TradeDetailPage({
           </div>
         </Card>
 
-        <Card title="Gross → Net" className="row-span-2">
+        <Card title="Gross → Net" className="lg:row-span-2">
           <dl className="tabular space-y-1.5 text-sm">
             <div className="flex justify-between"><dt>Gross P&amp;L</dt><dd><Money value={t.grossPnl} pnl decimals /></dd></div>
             {charges.map((c) => (
@@ -127,31 +135,52 @@ export default async function TradeDetailPage({
           )}
         </Card>
 
-        <Card title="Plan & risk" className="lg:col-span-2">
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-            <Stat label="Stop-loss">{t.plannedSL != null ? <span className="tabular">{formatNumber(t.plannedSL, 2)}</span> : "—"}</Stat>
-            <Stat label="Target">{t.plannedTarget != null ? <span className="tabular">{formatNumber(t.plannedTarget, 2)}</span> : "—"}</Stat>
-            <Stat label="Planned R:R">{t.plannedR != null ? `1 : ${t.plannedR.toFixed(2)}` : "—"}</Stat>
-            <Stat label="R-multiple" hint={t.plannedSL == null ? "Add a stop-loss to see R" : "Net P&L ÷ ₹ risked"}>
-              {t.rMultiple != null ? <span className={pnlClass(t.rMultiple)}>{t.rMultiple.toFixed(2)}R</span> : "—"}
-            </Stat>
-            <Stat label="Strategy">{t.strategy?.name ?? "—"}</Stat>
-            <Stat label="Followed plan?">{t.followedPlan == null ? "—" : t.followedPlan ? "Yes" : "No"}</Stat>
-            <Stat label="Emotion before">{t.emotionBefore ?? "—"}</Stat>
-            <Stat label="Emotion after">{t.emotionAfter ?? "—"}</Stat>
-          </div>
-          {t.tags.length > 0 && (
-            <div className="mt-4 flex flex-wrap gap-1.5">
-              {t.tags.map(({ tag }) => (
-                <span key={tag.id} className="rounded-full bg-surface-2 px-2.5 py-0.5 text-xs">{tag.name}</span>
-              ))}
+        {(exc || t.rMultiple != null) && (
+          <Card title="Result vs plan" className="lg:col-span-2">
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+              <Stat label="R-multiple" hint="Net P&L ÷ ₹ risked">
+                {t.rMultiple != null ? <span className={pnlClass(t.rMultiple)}>{t.rMultiple.toFixed(2)}R</span> : "—"}
+              </Stat>
+              <Stat label="Planned R:R">{t.plannedR != null ? `1 : ${t.plannedR.toFixed(2)}` : "—"}</Stat>
+              {exc && (
+                <>
+                  <Stat label="Best open profit"><Money value={exc.mfe} className="text-profit" /></Stat>
+                  <Stat label="Left on table" hint={exc.capturedPct == null ? undefined : exc.capturedPct < 0 ? "Was in profit before it reversed" : `Captured ${exc.capturedPct}% of the move`}>
+                    <Money value={exc.leftOnTable} className="text-warn" />
+                  </Stat>
+                </>
+              )}
             </div>
-          )}
-          <p className="mt-4 text-xs text-muted">Editing emotions, tags, strategy and screenshots arrives in Day 1, step 8.</p>
-        </Card>
+          </Card>
+        )}
 
-        <Card title="Notes" className="lg:col-span-2">
-          <p className="whitespace-pre-wrap text-sm">{t.notes || <span className="text-muted">No notes.</span>}</p>
+        <Card title="Review this trade" className="lg:col-span-3">
+          <TradeReviewForm
+            tradeId={t.id}
+            trade={{ direction: t.direction, qty: t.qty, avgEntry: t.avgEntry, avgExit: t.avgExit, netPnl: t.netPnl }}
+            strategies={strategies.map((s) => ({
+              id: s.id,
+              name: s.name,
+              entryRules: parseRules(s.entryRules),
+              exitRules: parseRules(s.exitRules),
+              riskRules: parseRules(s.riskRules),
+            }))}
+            allTags={allTags.map((x) => x.name)}
+            initial={{
+              strategyId: t.strategyId,
+              checkedRules: parseIdList(t.ruleChecks.find((c) => c.strategyId === t.strategyId)?.checkedRules),
+              tags: t.tags.filter((x) => x.accepted).map((x) => x.tag.name),
+              emotionBefore: t.emotionBefore,
+              emotionAfter: t.emotionAfter,
+              followedPlan: t.followedPlan,
+              plannedSL: t.plannedSL,
+              plannedTarget: t.plannedTarget,
+              highPrice: t.highPrice,
+              lowPrice: t.lowPrice,
+              notes: t.notes,
+              screenshotUrl: t.screenshot ? `/api/uploads/${t.screenshot}` : null,
+            }}
+          />
         </Card>
 
         <form action={deleteTrade} className="lg:col-start-3">

@@ -1,6 +1,7 @@
 import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { DayNotes } from "@/components/journal/DayNotes";
 import { Card } from "@/components/ui/Card";
 import { Money } from "@/components/ui/Money";
 import { db } from "@/lib/db";
@@ -17,8 +18,8 @@ function shiftDay(date: string, delta: number) {
   return d.toISOString().slice(0, 10);
 }
 
-// Minimal day view so the dashboard calendar links work. Notes, plan editing and
-// reflections arrive in Day 1, step 8.
+// One trading day: trades, totals, plan summary and an editable note.
+// Plan and end-of-day reflection editing live in the Notebook (Day 2).
 export default async function JournalDayPage({ params }: { params: Promise<{ date: string }> }) {
   const [{ date }, user] = await Promise.all([params, getCurrentUser()]);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) notFound();
@@ -35,8 +36,8 @@ export default async function JournalDayPage({ params }: { params: Promise<{ dat
 
   return (
     <>
-      <Link href="/dashboard" className="mb-4 inline-flex items-center gap-1 text-sm text-muted hover:text-fg">
-        <ArrowLeft size={16} /> Dashboard
+      <Link href="/journal" className="mb-4 inline-flex items-center gap-1 text-sm text-muted hover:text-fg">
+        <ArrowLeft size={16} /> Daily Journal
       </Link>
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
@@ -53,7 +54,12 @@ export default async function JournalDayPage({ params }: { params: Promise<{ dat
       </div>
 
       {trades.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-border bg-surface p-10 text-center text-sm text-muted">No trades on this day.</div>
+        <div className="space-y-4">
+          <div className="rounded-xl border border-dashed border-border bg-surface p-10 text-center text-sm text-muted">No trades on this day.</div>
+          <Card title="Notes">
+            <DayNotes date={date} initial={journal?.notes ?? ""} rows={5} />
+          </Card>
+        </div>
       ) : (
         <div className="grid gap-4 lg:grid-cols-3">
           <Card title={`${trades.length} trades · ${s.winRate.toFixed(0)}% win rate`} className="lg:col-span-2">
@@ -82,7 +88,10 @@ export default async function JournalDayPage({ params }: { params: Promise<{ dat
                 Plan: max {journal.planMaxTrades} trades, max loss <Money value={journal.planMaxLoss ?? 0} />. Mood: {journal.planMood ?? "—"}.
               </p>
             )}
-            {journal?.notes && <p className="mt-3 text-sm">{journal.notes}</p>}
+            <div className="mt-4 border-t border-border pt-3">
+              <h3 className="mb-2 text-sm font-medium">Notes</h3>
+              <DayNotes date={date} initial={journal?.notes ?? ""} rows={5} />
+            </div>
           </Card>
         </div>
       )}
