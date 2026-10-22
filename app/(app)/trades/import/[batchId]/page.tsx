@@ -1,7 +1,10 @@
-import { CheckCircle2, Sparkles, Undo2 } from "lucide-react";
+import { CheckCircle2, Undo2 } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ReportCard } from "@/components/coach/ReportCard";
 import { Card } from "@/components/ui/Card";
+import { aiConfig } from "@/lib/ai/client";
+import { getCachedReport } from "@/lib/ai/coach";
 import { ConfirmButton } from "@/components/ui/ConfirmButton";
 import { Money } from "@/components/ui/Money";
 import { chargesPctOfGross } from "@/lib/charges";
@@ -48,9 +51,17 @@ export default async function ImportSummaryPage({ params }: { params: Promise<{ 
         <Card><div className="text-xs text-muted">Net P&amp;L</div><Money value={net} pnl className="text-lg font-medium" /></Card>
       </div>
 
-      <Card className="mb-4 border-accent/40" title={<span className="flex items-center gap-2 text-fg"><Sparkles size={16} className="text-accent" /> What your data says</span>}>
-        <p className="text-sm text-muted">The AI Coach&apos;s first-import analysis appears here once it&apos;s built (Day 2, step 12).</p>
-      </Card>
+      <div className="mb-4">
+        <ReportCard
+          type="FIRST_IMPORT"
+          reportKey={batch.id}
+          initial={await getCachedReport(user.id, "FIRST_IMPORT", batch.id)}
+          aiEnabled={aiConfig().enabled}
+          autoGenerate
+          title="What your data says"
+          subtitle="The AI Coach's first read of your journal, including this import."
+        />
+      </div>
 
       <Card title="Trades in this import">
         <ul className="divide-y divide-border text-sm">

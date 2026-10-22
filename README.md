@@ -19,7 +19,7 @@ To enable the AI Coach, set these in `.env`:
 
 ```
 ANTHROPIC_API_KEY="sk-ant-..."
-ANTHROPIC_MODEL="claude-sonnet-5-5"
+ANTHROPIC_MODEL="claude-opus-5-5"
 ```
 
 ## Useful scripts
