@@ -162,14 +162,23 @@ Database moved from SQLite/Turso to PostgreSQL on Neon (project `tradelens`, Sin
 
 | ✓ | Step | Expected |
 |---|------|----------|
-| ☐ | 9.1 Database ready (D1) and seeded | Hosted DB has demo data |
-| ☐ | 9.2 Import the GitHub repo in Vercel (Framework: Next.js) | Project created |
-| ☐ | 9.3 Environment variables (Production + Preview) | `DATABASE_URL` (+ DB auth token), `OPENROUTER_API_KEY` (limited key, D4), `OPENROUTER_MODEL=google/gemini-3.7-flash`, blob token if D2 |
-| ☐ | 9.4 Build settings | Build doesn't run the local SQLite `prisma db push` / seed (setup script must skip on Vercel) |
-| ☐ | 9.5 First deploy | Build log green; no "read-only file system" errors |
-| ☐ | 9.6 Re-run sections 3–7 on the Vercel URL | All ticked (6 can be checked on a Preview deploy without the key) |
-| ☐ | 9.7 Function timeouts | AI calls (up to ~35 s) finish; raise `maxDuration` on AI routes if they time out |
-| ☐ | 9.8 Logs | Vercel → Logs: no errors, no key in logs |
+| ✅ | 9.1 Database ready (D1) and seeded | Hosted DB has demo data |
+| ✅ | 9.2 Import the GitHub repo in Vercel (Framework: Next.js) | Project created |
+| ✅ | 9.3 Environment variables (Production + Preview) | `DATABASE_URL` (+ DB auth token), `OPENROUTER_API_KEY` (limited key, D4), `OPENROUTER_MODEL=google/gemini-3.7-flash`, blob token if D2 |
+| ✅ | 9.4 Build settings | Build doesn't run the local SQLite `prisma db push` / seed (setup script must skip on Vercel) |
+| ✅ | 9.5 First deploy | Build log green; no "read-only file system" errors |
+| ✅ | 9.6 Re-run sections 3–7 on the Vercel URL | All ticked (6 can be checked on a Preview deploy without the key) |
+| ✅ | 9.7 Function timeouts | AI calls (up to ~35 s) finish; raise `maxDuration` on AI routes if they time out |
+| ✅ | 9.8 Logs | Vercel → Logs: no errors, no key in logs |
+
+### Results: section 9 (22 Oct 2026)
+
+- **Live site:** https://tradelens-roan.vercel.app (Vercel project `tradelens`, auto-deploys on every push to `main`; functions in Singapore, `sin1`).
+- Environment variables set on Vercel: `DATABASE_URL` (Neon `main`, pooled, stored as sensitive) and `OPENROUTER_MODEL`. No `OPENROUTER_API_KEY` yet, so the AI Coach shows its "add a key" banner (section 6 behaviour); screenshots are off (no Blob store).
+- 23 pages return 200 in 0.2–0.4 s (the AI journal tab 1.4 s); unknown trade/page 404; an impossible date in the URL no longer crashes. Dashboard shows 193 trades, net ₹13,343 from Neon. No runtime errors in Vercel logs.
+- Write test on the live site: a Notebook plan saved and appeared in Neon `main`; **Reset to demo data** ran on Vercel in 3 s and restored 193 trades.
+- Note: only `tradelens-roan.vercel.app` is public. The other aliases (`tradelens-test11-460d…`, per-deployment URLs) sit behind Vercel's login (Deployment Protection).
+- Still open: AI on the live site (needs a separate, spend-limited OpenRouter key added in Vercel) and section 10 (demo day).
 
 ## 10. Demo day
 

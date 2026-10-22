@@ -106,6 +106,8 @@ The AI Coach uses Google Gemini models through OpenRouter only: the model must s
 
 ## Deploy to Vercel + Neon
 
+Live demo: **https://tradelens-roan.vercel.app**
+
 The database is **Neon** (PostgreSQL) and the app runs on **Vercel**.
 
 1. **Neon:** create a project (Singapore is the closest region to India). Run `DATABASE_URL="<direct connection string>" npx prisma db push` once to create the tables, then `DATABASE_URL="<connection string>" npm run db:seed` to load the demo journal.
