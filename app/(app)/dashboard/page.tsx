@@ -166,22 +166,23 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
         />
       </div>
 
-      <div className="mb-4 grid grid-cols-1 gap-4 xl:grid-cols-[1fr_380px]">
-        <div className="min-w-0 space-y-4">
+      {/* Wide screens: charges, equity curve and the calendar stack on the left beside the tall risk/score column, so
+          neither side leaves a blank gap. Narrow screens keep the original single-column order (DOM order). */}
+      <div className="grid grid-cols-1 items-start gap-4 xl:grid-cols-[1fr_380px] xl:grid-rows-[auto_auto_1fr]">
+        <div className="min-w-0 xl:col-start-1 xl:row-start-1">
           <ChargesCallout gross={s.grossPnl} charges={s.totalCharges} />
-          <Card title={`Equity curve · ${VIEW_LABELS[view]}`}>
-            <EquityCurve data={curve} view={view} />
-          </Card>
         </div>
-        <div className="space-y-4">
+        <Card title={`Equity curve · ${VIEW_LABELS[view]}`} className="xl:col-start-1 xl:row-start-2">
+          <EquityCurve data={curve} view={view} />
+        </Card>
+        <div className="space-y-4 xl:col-start-2 xl:row-span-3 xl:row-start-1">
           <RiskWidget today={today} todayTrades={todayTrades.length} statuses={statuses} history={history} recent={breaches.slice(0, 4)} />
           <LensScoreCard score={score} scope="Last 20 trading days" />
         </div>
+        <Card title="P&L calendar" className="xl:col-start-1 xl:row-start-3">
+          <PnlCalendar days={days} month={month} view={view} monthHref={(m) => href({ month: m })} />
+        </Card>
       </div>
-
-      <Card title="P&L calendar">
-        <PnlCalendar days={days} month={month} view={view} monthHref={(m) => href({ month: m })} />
-      </Card>
     </>
   );
 }
